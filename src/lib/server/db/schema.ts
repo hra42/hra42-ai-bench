@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS benchmark_runs (
   name VARCHAR NOT NULL,
   description TEXT,
   benchmark_type VARCHAR NOT NULL CHECK (benchmark_type IN ('text', 'structured', 'tool', 'vision', 'document')),
-  template_id VARCHAR REFERENCES benchmark_templates(id),
+  template_id VARCHAR,
   status VARCHAR NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed')),
   total_models INTEGER DEFAULT 0,
   completed_models INTEGER DEFAULT 0,
@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS benchmark_runs (
 -- Model responses for each benchmark run
 CREATE TABLE IF NOT EXISTS model_responses (
   id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::VARCHAR),
-  run_id VARCHAR NOT NULL REFERENCES benchmark_runs(id) ON DELETE CASCADE,
-  model_id VARCHAR NOT NULL REFERENCES models(id),
+  run_id VARCHAR NOT NULL,
+  model_id VARCHAR NOT NULL,
   status VARCHAR NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'error')),
   response_text TEXT,
   response_json TEXT,
@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS model_responses (
   total_tokens INTEGER,
   cost DECIMAL(10, 6),
   latency_ms INTEGER,
+  openrouter_latency_ms INTEGER,
   time_to_first_token_ms INTEGER,
   tokens_per_second DECIMAL(10, 2),
   evaluation_score DECIMAL(5, 2),
