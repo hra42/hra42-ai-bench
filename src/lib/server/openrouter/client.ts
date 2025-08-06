@@ -58,7 +58,11 @@ class OpenRouterClient {
         'HTTP-Referer': 'https://hra42-bench.ai',
         'X-Title': 'HRA42 AI Benchmark',
       },
-      body: JSON.stringify({ ...request, stream: true }),
+      body: JSON.stringify({ 
+        ...request, 
+        stream: true,
+        usage: { include: true }  // Request usage information in the stream
+      }),
     });
 
     if (!response.ok) {
@@ -78,6 +82,24 @@ class OpenRouterClient {
     }
     
     return model;
+  }
+
+  async getGeneration(generationId: string): Promise<any> {
+    const url = `${this.baseUrl}/generation?id=${generationId}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to get generation details: ${response.status} - ${error}`);
+    }
+
+    const result = await response.json();
+    return result.data;
   }
 
   calculateCost(model: OpenRouterModel, promptTokens: number, completionTokens: number): number {
