@@ -1,9 +1,10 @@
 <script lang="ts">
-  export let variant: 'default' | 'success' | 'warning' | 'danger' | 'info' = 'default';
+  export let variant: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'secondary' = 'default';
   export let size: 'sm' | 'md' = 'md';
   
   const variantClasses = {
     default: 'bg-slate-100 text-slate-800',
+    secondary: 'bg-slate-100 text-slate-800',
     success: 'bg-green-100 text-green-800',
     warning: 'bg-amber-100 text-amber-800',
     danger: 'bg-red-100 text-red-800',
