@@ -38,14 +38,46 @@ class DuckDBClient {
     
     if (params && params.length > 0) {
       const statement = await conn.prepare(sql);
-      statement.bind(params);
+      // Bind parameters one by one with proper indexing
+      for (let i = 0; i < params.length; i++) {
+        let value = params[i];
+        // Handle undefined values as null
+        if (value === undefined) {
+          value = null;
+        }
+        // Convert booleans to integers for DuckDB
+        if (typeof value === 'boolean') {
+          value = value ? 1 : 0;
+        }
+        // DuckDB uses 1-based indexing for parameters
+        statement.bindValue(i + 1, value);
+      }
       const result = await statement.run();
-      const data = await result.getRows() as T[];
+      // Get rows as objects instead of arrays
+      const columns = result.columnNames();
+      const rawRows = await result.getRows();
+      const data = rawRows.map(row => {
+        const obj: any = {};
+        columns.forEach((col, idx) => {
+          obj[col] = row[idx];
+        });
+        return obj;
+      }) as T[];
       statement.destroySync();
       return data;
     } else {
       const result = await conn.run(sql);
-      return await result.getRows() as T[];
+      // Get rows as objects instead of arrays
+      const columns = result.columnNames();
+      const rawRows = await result.getRows();
+      const data = rawRows.map(row => {
+        const obj: any = {};
+        columns.forEach((col, idx) => {
+          obj[col] = row[idx];
+        });
+        return obj;
+      }) as T[];
+      return data;
     }
   }
 
@@ -75,10 +107,49 @@ export function getDB(): DuckDBClient {
   return dbClient;
 }
 
+export function getDuckDBClient(): DuckDBClient {
+  return getDB();
+}
+
 export async function closeDB(): Promise<void> {
   if (dbClient) {
     await dbClient.close();
     dbClient = null;
+  }
+}
+
+// Helper methods for simplified database operations
+export class SimplifiedDBClient {
+  private client: DuckDBClient;
+
+  constructor() {
+    this.client = getDB();
+  }
+
+  async all(sql: string, params?: any[]): Promise<any[]> {
+    return this.client.query(sql, params);
+  }
+
+  async run(sql: string, params?: any[]): Promise<void> {
+    if (params) {
+      await this.client.query(sql, params);
+    } else {
+      await this.client.exec(sql);
+    }
+  }
+
+  async prepare(sql: string): Promise<{
+    run: (params: any[]) => Promise<void>;
+    finalize: () => Promise<void>;
+  }> {
+    return {
+      run: async (params: any[]) => {
+        await this.client.query(sql, params);
+      },
+      finalize: async () => {
+        // No-op for compatibility
+      }
+    };
   }
 }
 
