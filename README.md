@@ -285,13 +285,13 @@ graph TD
 - [x] OpenRouter client setup
 - [x] Database schema creation
 
-### Phase 2: Core Benchmarking (Week 2)
-- [ ] Text generation benchmarking
-- [ ] Model selection interface
-- [ ] Benchmark execution pipeline
-- [ ] Real-time progress updates
-- [ ] Basic result display
-- [ ] Cost calculation
+### Phase 2: Core Benchmarking (Week 2) ✅
+- [x] Text generation benchmarking
+- [x] Model selection interface
+- [x] Benchmark execution pipeline
+- [x] Real-time progress updates
+- [x] Basic result display
+- [x] Cost calculation
 
 ### Phase 3: UI Components (Week 3)
 - [ ] Complete molecule components
