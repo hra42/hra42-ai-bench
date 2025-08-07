@@ -1,4 +1,5 @@
 # HRA42 Bench - LLM Comparison Platform
+
 ## Complete Development Plan
 
 ---
@@ -8,6 +9,7 @@
 HRA42 Bench is a streamlined SvelteKit application designed to benchmark Large Language Model (LLM) performance across multiple dimensions. It enables users to run benchmarks on various models simultaneously through OpenRouter's unified API, providing visual comparisons of responses, costs, and performance metrics.
 
 ### Key Features
+
 - **Multi-modal Benchmarking**: Text, structured output, vision, and document processing
 - **Simultaneous Comparison**: Benchmark multiple models with one request
 - **Cost & Performance Tracking**: Real-time metrics and historical tracking
@@ -19,6 +21,7 @@ HRA42 Bench is a streamlined SvelteKit application designed to benchmark Large L
 ## Technical Architecture
 
 ### Technology Stack
+
 - **Framework**: SvelteKit (Full-stack)
 - **Database**: DuckDB (EU-based embedded database)
 - **Styling**: Tailwind CSS (utility-first, no custom CSS)
@@ -27,6 +30,7 @@ HRA42 Bench is a streamlined SvelteKit application designed to benchmark Large L
 - **File Handling**: Temporary processing for multimodal inputs
 
 ### Project Structure
+
 ```
 hra42-bench/
 ├── src/
@@ -79,6 +83,7 @@ hra42-bench/
 ## Component Architecture
 
 ### Design System Philosophy
+
 - **Utility-First**: Every style is a Tailwind class
 - **Composition Over Inheritance**: Small, focused components that combine
 - **Consistency Through Constraints**: Use Tailwind's default scale
@@ -87,6 +92,7 @@ hra42-bench/
 ### Component Hierarchy
 
 #### Atoms (Base Components)
+
 ```
 atoms/
 ├── Button.svelte         # Variants: primary, secondary, ghost, danger
@@ -100,6 +106,7 @@ atoms/
 ```
 
 #### Molecules (Composed Components)
+
 ```
 molecules/
 ├── ModelSelector.svelte      # Multi-select with search
@@ -113,6 +120,7 @@ molecules/
 ```
 
 #### Organisms (Complex Sections)
+
 ```
 organisms/
 ├── BenchmarkConfigurator.svelte  # Benchmark type selection & config
@@ -125,6 +133,7 @@ organisms/
 ```
 
 #### Templates (Page Compositions)
+
 ```
 templates/
 ├── BenchmarkingInterface.svelte   # Main benchmark page structure
@@ -135,6 +144,7 @@ templates/
 ### Tailwind Configuration
 
 #### Color System
+
 - **Primary**: Blue spectrum (`blue-500` to `blue-700`)
 - **Success**: Green (`green-500`)
 - **Warning**: Amber (`amber-500`)
@@ -142,12 +152,14 @@ templates/
 - **Neutral**: Slate (`slate-50` to `slate-900`)
 
 #### Spacing Patterns
+
 - **Cards**: `p-4 md:p-6`
 - **Sections**: `py-8 md:py-12`
 - **Component gaps**: `space-y-4` or `gap-4`
 - **Inline spacing**: `space-x-2`
 
 #### Responsive Breakpoints
+
 - **Mobile**: Base styles
 - **Tablet**: `md:` (768px)
 - **Desktop**: `lg:` (1024px)
@@ -160,21 +172,25 @@ templates/
 ### DuckDB Tables
 
 **benchmark_runs**
+
 - Core benchmark execution tracking
 - Stores benchmark configuration and status
 - Links to all related model responses
 
 **model_responses**
+
 - Individual model response data
 - Performance metrics and costs
 - Error states and metadata
 
 **models**
+
 - Cached model information
 - Pricing and capability data
 - Updated periodically from OpenRouter
 
 **benchmark_templates**
+
 - Reusable benchmark configurations
 - Named templates for common benchmarks
 
@@ -185,26 +201,31 @@ templates/
 ### 1. Benchmark Types
 
 #### Text Generation
+
 - Simple prompt input
 - Response comparison
 - Token usage tracking
 
 #### Structured Output
+
 - JSON schema definition
 - Schema compliance visualization
 - Format validation display
 
 #### Tool/Function Calling
+
 - Function definition interface
 - Call sequence display
 - Parameter matching
 
 #### Vision Analysis
+
 - Image upload (drag & drop)
 - Base64 encoding for API
 - Visual response comparison
 
 #### Document Processing
+
 - PDF upload support
 - Text extraction comparison
 - Table/structure detection
@@ -225,12 +246,14 @@ graph TD
 ```
 
 ### 3. Real-time Updates
+
 - Server-Sent Events for progress
 - Streaming response display
 - Live cost calculation
 - Progressive result rendering
 
 ### 4. Historical Analysis
+
 - Trend detection over time
 - Model performance changes
 - Cost efficiency tracking
@@ -243,6 +266,7 @@ graph TD
 ### Main Benchmarking Interface
 
 #### Layout Structure
+
 ```
 ┌─────────────────────────────────────┐
 │         Navigation Bar              │
@@ -269,6 +293,7 @@ graph TD
 ```
 
 ### Responsive Behavior
+
 - **Mobile**: Stack components vertically
 - **Tablet**: 2-column grid for results
 - **Desktop**: 3-4 column grid for results
@@ -278,6 +303,7 @@ graph TD
 ## Implementation Phases
 
 ### Phase 1: Foundation (Week 1) ✅
+
 - [x] SvelteKit project setup
 - [x] Tailwind CSS configuration
 - [x] DuckDB integration (using new @duckdb/node-api)
@@ -286,6 +312,7 @@ graph TD
 - [x] Database schema creation
 
 ### Phase 2: Core Benchmarking (Week 2) ✅
+
 - [x] Text generation benchmarking
 - [x] Model selection interface
 - [x] Benchmark execution pipeline
@@ -294,6 +321,7 @@ graph TD
 - [x] Cost calculation
 
 ### Phase 3: UI Components (Week 3)
+
 - [ ] Complete molecule components
 - [ ] Organism components
 - [ ] Page templates
@@ -302,6 +330,7 @@ graph TD
 - [ ] Error handling
 
 ### Phase 4: Advanced Benchmarks (Week 4)
+
 - [ ] Structured output benchmarking
 - [ ] Function calling benchmarks
 - [ ] Image upload and processing
@@ -309,6 +338,7 @@ graph TD
 - [ ] Multi-modal comparisons
 
 ### Phase 5: Analytics & Polish (Week 5)
+
 - [ ] Historical data views
 - [ ] Trend analysis
 - [ ] Export functionality
@@ -323,12 +353,14 @@ graph TD
 ### OpenRouter Integration
 
 #### Client Configuration
+
 - API key management
 - Base URL configuration
 - Timeout settings
 - Retry logic for failures
 
 #### Request Handling
+
 - Rate limiting per model
 - Automatic retry logic
 - Error categorization
@@ -337,12 +369,14 @@ graph TD
 ### File Processing
 
 #### Image Handling
+
 - Accept: JPEG, PNG, WebP
 - Max size: 20MB (configurable)
 - Base64 encoding for API
 - Preview generation
 
 #### PDF Processing
+
 - Text extraction
 - Page limit handling
 - Structure preservation
@@ -351,12 +385,14 @@ graph TD
 ### Performance Optimizations
 
 #### Frontend
+
 - Lazy loading for history
 - Virtual scrolling for large lists
 - Debounced search inputs
 - Memoized expensive computations
 
 #### Backend
+
 - Cached model information
 - Batch insert for results
 - Indexed queries
@@ -366,12 +402,14 @@ graph TD
 ## Development Workflow
 
 ### Environment Setup
+
 - Development server with hot reload
 - Database initialization scripts
 - Migration support for schema changes
 - Production build process
 
 ### Environment Variables
+
 - OPENROUTER_API_KEY configuration
 - DATABASE_PATH for DuckDB location
 - PUBLIC_APP_NAME for branding
@@ -381,6 +419,7 @@ graph TD
 ## Deployment Considerations
 
 ### Self-Hosted Deployment
+
 - Single Docker container
 - Volume mount for DuckDB
 - Environment variable configuration
@@ -389,11 +428,13 @@ graph TD
 ## Success Metrics
 
 ### Technical Goals
+
 - Sub-second page loads
 - Real-time streaming responses
 - Zero data loss
 
 ### User Experience Goals
+
 - Intuitive benchmark configuration
 - Clear result comparison
 - Accurate cost tracking

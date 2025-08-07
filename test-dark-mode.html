@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body>
+    <div class="min-h-screen bg-white dark:bg-slate-900 transition-colors">
+        <div class="p-8">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                Dark Mode Test
+            </h1>
+            <p class="text-slate-600 dark:text-slate-300 mb-4">
+                Click the button below to toggle dark mode
+            </p>
+            <button 
+                onclick="document.documentElement.classList.toggle('dark')"
+                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+                Toggle Dark Mode
+            </button>
+            
+            <div class="mt-8 grid grid-cols-2 gap-4">
+                <div class="p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 class="font-semibold text-slate-900 dark:text-white">Card 1</h2>
+                    <p class="text-slate-600 dark:text-slate-300">This is a card with dark mode support</p>
+                </div>
+                <div class="p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 class="font-semibold text-slate-900 dark:text-white">Card 2</h2>
+                    <p class="text-slate-600 dark:text-slate-300">Another card with dark mode</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check for saved preference or system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>

@@ -5,11 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Core Development
+
 - `npm run dev` - Start the development server with hot reload
 - `npm run build` - Build the production version
 - `npm run preview` - Preview the production build locally
 
 ### Code Quality
+
 - `npm run check` - Run type checking with svelte-check
 - `npm run check:watch` - Run type checking in watch mode
 - `npm run lint` - Check code formatting and run ESLint
@@ -18,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture Overview
 
 ### Tech Stack
+
 - **Framework**: SvelteKit (full-stack application framework)
 - **Database**: DuckDB (embedded analytical database)
 - **Styling**: Tailwind CSS v4 (utility-first, no custom CSS)
@@ -51,6 +54,7 @@ The application follows SvelteKit conventions with a clear separation of concern
 All styling uses Tailwind CSS utilities exclusively. Follow these patterns:
 
 **Color System**:
+
 - Primary: `blue-500` to `blue-700`
 - Success: `green-500`
 - Warning: `amber-500`
@@ -58,17 +62,20 @@ All styling uses Tailwind CSS utilities exclusively. Follow these patterns:
 - Neutral: `slate-50` to `slate-900`
 
 **Spacing Patterns**:
+
 - Cards: `p-4 md:p-6`
 - Sections: `py-8 md:py-12`
 - Component gaps: `space-y-4` or `gap-4`
 
 **Responsive Design**:
+
 - Mobile-first approach
 - Breakpoints: `md:` (768px), `lg:` (1024px), `xl:` (1280px)
 
 ### Database Schema
 
 DuckDB tables:
+
 - `benchmark_runs` - Core benchmark execution tracking
 - `model_responses` - Individual model response data with metrics
 - `models` - Cached model information from OpenRouter
@@ -94,6 +101,7 @@ DuckDB tables:
 ### Benchmark Types
 
 The application supports five benchmark types:
+
 1. **Text Generation** - Simple prompt/response comparison
 2. **Structured Output** - JSON schema compliance testing
 3. **Tool/Function Calling** - Function definition and execution
