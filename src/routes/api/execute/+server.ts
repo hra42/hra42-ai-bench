@@ -5,117 +5,125 @@ import { SimplifiedDBClient } from '$lib/server/db/client';
 import type { BenchmarkConfig } from '$lib/types/benchmark';
 
 export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const { config, modelIds }: { config: BenchmarkConfig; modelIds: string[] } = await request.json();
-    
-    if (!config || !modelIds || modelIds.length === 0) {
-      return json({ error: 'Invalid request' }, { status: 400 });
-    }
+	try {
+		const { config, modelIds }: { config: BenchmarkConfig; modelIds: string[] } =
+			await request.json();
 
-    const db = new SimplifiedDBClient();
-    const client = getOpenRouterClient();
+		if (!config || !modelIds || modelIds.length === 0) {
+			return json({ error: 'Invalid request' }, { status: 400 });
+		}
 
-    // Create benchmark run
-    const runId = crypto.randomUUID();
-    await db.run(`
+		const db = new SimplifiedDBClient();
+		const client = getOpenRouterClient();
+
+		// Create benchmark run
+		const runId = crypto.randomUUID();
+		await db.run(
+			`
       INSERT INTO benchmark_runs (
         id, name, description, benchmark_type, status,
         total_models, completed_models, system_prompt, user_prompt,
         max_tokens, temperature, started_at
       ) VALUES (?, ?, ?, ?, 'running', ?, 0, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `, [
-      runId,
-      config.name || 'Untitled Benchmark',
-      config.description || null,
-      config.type,
-      modelIds.length,
-      config.systemPrompt || null,
-      config.userPrompt,
-      config.maxTokens || 1000,
-      config.temperature || 0.7
-    ]);
+    `,
+			[
+				runId,
+				config.name || 'Untitled Benchmark',
+				config.description || null,
+				config.type,
+				modelIds.length,
+				config.systemPrompt || null,
+				config.userPrompt,
+				config.maxTokens || 1000,
+				config.temperature || 0.7
+			]
+		);
 
-    // Create response entries for each model
-    const responseIds: Record<string, string> = {};
-    for (const modelId of modelIds) {
-      const responseId = crypto.randomUUID();
-      responseIds[modelId] = responseId;
-      
-      await db.run(`
+		// Create response entries for each model
+		const responseIds: Record<string, string> = {};
+		for (const modelId of modelIds) {
+			const responseId = crypto.randomUUID();
+			responseIds[modelId] = responseId;
+
+			await db.run(
+				`
         INSERT INTO model_responses (
           id, run_id, model_id, status, started_at
         ) VALUES (?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-      `, [responseId, runId, modelId]);
-    }
+      `,
+				[responseId, runId, modelId]
+			);
+		}
 
-    // Start processing models sequentially
-    processModels(runId, config, modelIds, responseIds, client, db);
+		// Start processing models sequentially
+		processModels(runId, config, modelIds, responseIds, client, db);
 
-    return json({ 
-      runId, 
-      message: 'Benchmark started',
-      responseIds 
-    });
-  } catch (error) {
-    console.error('Error starting benchmark:', error);
-    return json({ error: 'Failed to start benchmark' }, { status: 500 });
-  }
+		return json({
+			runId,
+			message: 'Benchmark started',
+			responseIds
+		});
+	} catch (error) {
+		console.error('Error starting benchmark:', error);
+		return json({ error: 'Failed to start benchmark' }, { status: 500 });
+	}
 };
 
 async function processModels(
-  runId: string,
-  config: BenchmarkConfig,
-  modelIds: string[],
-  responseIds: Record<string, string>,
-  client: any,
-  db: any
+	runId: string,
+	config: BenchmarkConfig,
+	modelIds: string[],
+	responseIds: Record<string, string>,
+	client: any,
+	db: any
 ) {
-  let completedCount = 0;
-  let totalCost = 0;
+	let completedCount = 0;
+	let totalCost = 0;
 
-  for (const modelId of modelIds) {
-    const responseId = responseIds[modelId];
-    
-    try {
-      // Update status to running
-      await db.run(`
+	for (const modelId of modelIds) {
+		const responseId = responseIds[modelId];
+
+		try {
+			// Update status to running
+			await db.run(
+				`
         UPDATE model_responses 
         SET status = 'running', started_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `, [responseId]);
+      `,
+				[responseId]
+			);
 
-      const startTime = Date.now();
-      
-      // Prepare messages
-      const messages: any[] = [];
-      if (config.systemPrompt) {
-        messages.push({ role: 'system', content: config.systemPrompt });
-      }
-      messages.push({ role: 'user', content: config.userPrompt });
+			const startTime = Date.now();
 
-      // Make API call
-      const response = await client.chat({
-        model: modelId,
-        messages,
-        max_tokens: config.maxTokens || 1000,
-        temperature: config.temperature || 0.7,
-        stream: false
-      });
+			// Prepare messages
+			const messages: any[] = [];
+			if (config.systemPrompt) {
+				messages.push({ role: 'system', content: config.systemPrompt });
+			}
+			messages.push({ role: 'user', content: config.userPrompt });
 
-      const latencyMs = Date.now() - startTime;
+			// Make API call with usage accounting
+			const response = await client.chat({
+				model: modelId,
+				messages,
+				max_tokens: config.maxTokens || 1000,
+				temperature: config.temperature || 0.7,
+				stream: false,
+				usage: {
+					include: true  // Request usage information from OpenRouter
+				}
+			});
 
-      // Get model details for cost calculation
-      const modelDetails = await client.getModelDetails(modelId);
-      const cost = client.calculateCost(
-        modelDetails,
-        response.usage?.prompt_tokens || 0,
-        response.usage?.completion_tokens || 0
-      );
+			const latencyMs = Date.now() - startTime;
 
-      totalCost += cost;
+			// OpenRouter returns the cost directly in the response
+			const cost = response.usage?.cost || 0;
+			totalCost += cost;
 
-      // Update response in database
-      await db.run(`
+			// Update response in database
+			await db.run(
+				`
         UPDATE model_responses 
         SET 
           status = 'completed',
@@ -128,54 +136,63 @@ async function processModels(
           tokens_per_second = ?,
           completed_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `, [
-        response.choices?.[0]?.message?.content || '',
-        response.usage?.prompt_tokens || 0,
-        response.usage?.completion_tokens || 0,
-        response.usage?.total_tokens || 0,
-        cost,
-        latencyMs,
-        response.usage?.completion_tokens ? (response.usage.completion_tokens / (latencyMs / 1000)) : 0,
-        responseId
-      ]);
+      `,
+				[
+					response.choices?.[0]?.message?.content || '',
+					response.usage?.prompt_tokens || 0,
+					response.usage?.completion_tokens || 0,
+					response.usage?.total_tokens || 0,
+					cost,
+					latencyMs,
+					response.usage?.completion_tokens
+						? response.usage.completion_tokens / (latencyMs / 1000)
+						: 0,
+					responseId
+				]
+			);
 
-      completedCount++;
+			completedCount++;
+		} catch (error) {
+			console.error(`Error processing model ${modelId}:`, error);
 
-    } catch (error) {
-      console.error(`Error processing model ${modelId}:`, error);
-      
-      // Update response with error
-      await db.run(`
+			// Update response with error
+			await db.run(
+				`
         UPDATE model_responses 
         SET 
           status = 'error',
           error_message = ?,
           completed_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `, [
-        error instanceof Error ? error.message : 'Unknown error',
-        responseId
-      ]);
+      `,
+				[error instanceof Error ? error.message : 'Unknown error', responseId]
+			);
 
-      completedCount++;
-    }
+			completedCount++;
+		}
 
-    // Update benchmark run progress
-    await db.run(`
+		// Update benchmark run progress
+		await db.run(
+			`
       UPDATE benchmark_runs 
       SET 
         completed_models = ?,
         total_cost = ?
       WHERE id = ?
-    `, [completedCount, totalCost, runId]);
-  }
+    `,
+			[completedCount, totalCost, runId]
+		);
+	}
 
-  // Mark benchmark as completed
-  await db.run(`
+	// Mark benchmark as completed
+	await db.run(
+		`
     UPDATE benchmark_runs 
     SET 
       status = 'completed',
       completed_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `, [runId]);
+  `,
+		[runId]
+	);
 }
