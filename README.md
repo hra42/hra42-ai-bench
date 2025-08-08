@@ -333,7 +333,7 @@ graph TD
 ### Phase 4: Advanced Benchmarks (Week 4)
 
 - [x] Structured output benchmarking
-- [ ] Function calling benchmarks
+- [x] Function calling benchmarks
 - [ ] Image upload and processing
 - [ ] PDF handling
 - [ ] Multi-modal comparisons
