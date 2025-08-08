@@ -334,9 +334,8 @@ graph TD
 
 - [x] Structured output benchmarking
 - [x] Function calling benchmarks
-- [ ] Image upload and processing
+- [x] Image upload and processing
 - [ ] PDF handling
-- [ ] Multi-modal comparisons
 
 ### Phase 5: Analytics & Polish (Week 5)
 
