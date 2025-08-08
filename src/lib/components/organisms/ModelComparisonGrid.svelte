@@ -4,6 +4,7 @@
 	import TokenCounter from '../molecules/TokenCounter.svelte';
 	import StatusIndicator from '../molecules/StatusIndicator.svelte';
 	import JsonResponseViewer from '../molecules/JsonResponseViewer.svelte';
+	import FunctionCallViewer from '../molecules/FunctionCallViewer.svelte';
 
 	export let responses: Array<{
 		modelId: string;
@@ -56,9 +57,23 @@
 					</div>
 				</div>
 
-				{#if (response.status === 'completed' || response.status === 'running') && response.response}
+				{#if (response.status === 'completed' || response.status === 'running') && (response.response || response.toolCalls)}
 					{#if benchmarkType === 'structured' && response.status === 'completed'}
-						<JsonResponseViewer response={response.response} schema={jsonSchema} modelName="" />
+						<JsonResponseViewer
+							response={response.response || ''}
+							schema={jsonSchema}
+							modelName=""
+						/>
+					{:else if benchmarkType === 'tool' && response.toolCalls}
+						<div class="space-y-2">
+							<FunctionCallViewer toolCalls={response.toolCalls} compact={false} />
+							{#if response.response}
+								<div class="max-h-64 overflow-y-auto rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+									<pre
+										class="font-mono text-xs whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.response}</pre>
+								</div>
+							{/if}
+						</div>
 					{:else}
 						<div class="prose prose-sm max-w-none">
 							<div class="max-h-96 overflow-y-auto rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
