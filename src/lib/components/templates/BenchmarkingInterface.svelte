@@ -17,8 +17,26 @@
 	export let files: File[] = [];
 	export let jsonSchema = '';
 	export let functionDefinitions = '';
-	export let responses: any[] = [];
-	export let costBreakdown: any[] = [];
+	export let responses: Array<{
+		modelId: string;
+		modelName: string;
+		provider: string;
+		status: 'pending' | 'running' | 'completed' | 'failed';
+		response?: string;
+		error?: string;
+		duration?: number;
+		cost?: number;
+		inputTokens?: number;
+		outputTokens?: number;
+	}> = [];
+	export let costBreakdown: Array<{
+		name: string;
+		inputCost: number;
+		outputCost: number;
+		totalCost: number;
+		inputTokens: number;
+		outputTokens: number;
+	}> = [];
 	export let isRunning = false;
 
 	const dispatch = createEventDispatcher();
@@ -48,17 +66,21 @@
 		<div class="space-y-8">
 			<div>
 				<h1 class="text-3xl font-bold text-slate-900 dark:text-white">Benchmark LLMs</h1>
-				<p class="mt-2 text-slate-600 dark:text-slate-400">Compare multiple language models side by side</p>
+				<p class="mt-2 text-slate-600 dark:text-slate-400">
+					Compare multiple language models side by side
+				</p>
 			</div>
 
-			<div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+			<div
+				class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+			>
 				<div class="space-y-6">
 					<div>
 						<h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Select Models</h2>
 						<SimpleModelSelector models={availableModels} bind:selected={selectedModels} />
 					</div>
 
-					<div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+					<div class="border-t border-slate-200 pt-6 dark:border-slate-700">
 						<BenchmarkConfigurator
 							bind:benchmarkName
 							bind:benchmarkType

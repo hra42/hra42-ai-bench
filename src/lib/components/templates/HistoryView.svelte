@@ -6,7 +6,16 @@
 	import Select from '../atoms/Select.svelte';
 	import HistoryTable from '../organisms/HistoryTable.svelte';
 
-	export let benchmarks: any[] = [];
+	export let benchmarks: Array<{
+		id: string;
+		name: string;
+		type: string;
+		models: string[];
+		status: 'pending' | 'running' | 'completed' | 'failed';
+		totalCost: number;
+		avgDuration: number;
+		createdAt: Date;
+	}> = [];
 	export let searchQuery = '';
 	export let filterType = 'all';
 	export let filterStatus = 'all';
@@ -59,7 +68,9 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<h1 class="text-3xl font-bold text-slate-900 dark:text-white">Benchmark History</h1>
-					<p class="mt-2 text-slate-600 dark:text-slate-400">View and analyze all your past benchmarks</p>
+					<p class="mt-2 text-slate-600 dark:text-slate-400">
+						View and analyze all your past benchmarks
+					</p>
 				</div>
 
 				<div class="flex items-center gap-3">

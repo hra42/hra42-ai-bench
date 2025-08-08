@@ -41,7 +41,9 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<h1 class="text-3xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-					<p class="mt-2 text-slate-600 dark:text-slate-400">Overview of your LLM benchmarking activity</p>
+					<p class="mt-2 text-slate-600 dark:text-slate-400">
+						Overview of your LLM benchmarking activity
+					</p>
 				</div>
 
 				<Button variant="primary" size="lg" on:click={navigateToBenchmark}>New Benchmark</Button>
@@ -95,12 +97,14 @@
 				<Card>
 					<div class="p-6">
 						<div class="mb-4 flex items-center justify-between">
-							<h2 class="text-lg font-semibold text-slate-900 dark:text-white">Recent Benchmarks</h2>
+							<h2 class="text-lg font-semibold text-slate-900 dark:text-white">
+								Recent Benchmarks
+							</h2>
 						</div>
 
 						{#if recentBenchmarks.length > 0}
 							<div class="space-y-3">
-								{#each recentBenchmarks as benchmark}
+								{#each recentBenchmarks as benchmark (benchmark.id)}
 									<button
 										class="w-full rounded-lg p-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-700"
 										on:click={() => viewBenchmark(benchmark.id)}
@@ -130,12 +134,16 @@
 
 				<Card>
 					<div class="p-6">
-						<h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Top Performing Models</h2>
+						<h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
+							Top Performing Models
+						</h2>
 
 						{#if topModels.length > 0}
 							<div class="space-y-3">
-								{#each topModels as model}
-									<div class="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-700 p-3">
+								{#each topModels as model (model.name)}
+									<div
+										class="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-700"
+									>
 										<div>
 											<p class="font-medium text-slate-900 dark:text-white">{model.name}</p>
 											<p class="text-sm text-slate-500 dark:text-slate-400">
