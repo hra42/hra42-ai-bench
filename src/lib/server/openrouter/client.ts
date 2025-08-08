@@ -85,7 +85,7 @@ class OpenRouterClient {
 		const cached = await db.all(`SELECT * FROM models WHERE id = ? LIMIT 1`, [modelId]);
 
 		if (cached.length > 0) {
-			const model = cached[0];
+			const model = cached[0] as any;
 			return {
 				id: model.id,
 				name: model.name,

@@ -50,7 +50,7 @@ class DuckDBClient {
 					value = value ? 1 : 0;
 				}
 				// DuckDB uses 1-based indexing for parameters
-				statement.bindValue(i + 1, value);
+				statement.bindValue(i + 1, value as any);
 			}
 			const result = await statement.run();
 			// Get rows as objects instead of arrays

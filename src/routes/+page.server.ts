@@ -60,11 +60,11 @@ export const load: PageServerLoad = async () => {
 		const modelsCount = await db.all(modelsCountQuery);
 
 		return {
-			totalBenchmarks: stats[0]?.total_benchmarks || 0,
-			totalCost: parseFloat(stats[0]?.total_cost || '0'),
-			avgResponseTime: parseFloat(stats[0]?.avg_response_time || '0'),
-			modelsTested: modelsCount[0]?.models_tested || 0,
-			recentBenchmarks: recentBenchmarks.map((b) => ({
+			totalBenchmarks: (stats[0] as any)?.total_benchmarks || 0,
+			totalCost: parseFloat((stats[0] as any)?.total_cost || '0'),
+			avgResponseTime: parseFloat((stats[0] as any)?.avg_response_time || '0'),
+			modelsTested: (modelsCount[0] as any)?.models_tested || 0,
+			recentBenchmarks: recentBenchmarks.map((b: any) => ({
 				id: b.id,
 				name: b.name || 'Unnamed Benchmark',
 				type: b.type,
@@ -72,7 +72,7 @@ export const load: PageServerLoad = async () => {
 				cost: parseFloat(b.cost || '0'),
 				createdAt: new Date(b.created_at)
 			})),
-			topModels: topModels.map((m) => ({
+			topModels: topModels.map((m: any) => ({
 				name: m.name,
 				usageCount: parseInt(m.usage_count || '0'),
 				avgCost: parseFloat(m.avg_cost || '0'),
