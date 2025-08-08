@@ -81,12 +81,9 @@ class OpenRouterClient {
 		// First try to get from database cache
 		const { SimplifiedDBClient } = await import('$lib/server/db/client');
 		const db = new SimplifiedDBClient();
-		
-		const cached = await db.all(
-			`SELECT * FROM models WHERE id = ? LIMIT 1`,
-			[modelId]
-		);
-		
+
+		const cached = await db.all(`SELECT * FROM models WHERE id = ? LIMIT 1`, [modelId]);
+
 		if (cached.length > 0) {
 			const model = cached[0];
 			return {
@@ -100,10 +97,12 @@ class OpenRouterClient {
 				context_length: model.context_length,
 				architecture: model.architecture ? JSON.parse(model.architecture) : undefined,
 				top_provider: model.top_provider ? JSON.parse(model.top_provider) : undefined,
-				per_request_limits: model.per_request_limits ? JSON.parse(model.per_request_limits) : undefined
+				per_request_limits: model.per_request_limits
+					? JSON.parse(model.per_request_limits)
+					: undefined
 			};
 		}
-		
+
 		// Fallback to API if not in cache
 		const models = await this.getModels();
 		const model = models.find((m) => m.id === modelId);
@@ -115,7 +114,11 @@ class OpenRouterClient {
 		return model;
 	}
 
-	async getGeneration(generationId: string): Promise<any> {
+	async getGeneration(generationId: string): Promise<{
+		latency?: number;
+		generation_time?: number;
+		moderation_latency?: number;
+	}> {
 		const url = `${this.baseUrl}/generation?id=${generationId}`;
 
 		const response = await fetch(url, {
@@ -136,13 +139,15 @@ class OpenRouterClient {
 	calculateCost(model: OpenRouterModel, promptTokens: number, completionTokens: number): number {
 		// Handle pricing that might be strings from API
 		// OpenRouter pricing is in dollars per token (e.g., 0.0000008 = $0.80 per million)
-		const promptPrice = typeof model.pricing?.prompt === 'string' 
-			? parseFloat(model.pricing.prompt) 
-			: (model.pricing?.prompt || 0);
-		const completionPrice = typeof model.pricing?.completion === 'string'
-			? parseFloat(model.pricing.completion)
-			: (model.pricing?.completion || 0);
-			
+		const promptPrice =
+			typeof model.pricing?.prompt === 'string'
+				? parseFloat(model.pricing.prompt)
+				: model.pricing?.prompt || 0;
+		const completionPrice =
+			typeof model.pricing?.completion === 'string'
+				? parseFloat(model.pricing.completion)
+				: model.pricing?.completion || 0;
+
 		// OpenRouter pricing is already per token, so just multiply
 		const promptCost = promptTokens * promptPrice;
 		const completionCost = completionTokens * completionPrice;

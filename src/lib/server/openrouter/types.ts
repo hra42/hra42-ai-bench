@@ -52,7 +52,7 @@ export interface OpenRouterTool {
 		description?: string;
 		parameters?: {
 			type: 'object';
-			properties: Record<string, any>;
+			properties: Record<string, unknown>;
 			required?: string[];
 		};
 	};
@@ -68,7 +68,7 @@ export interface OpenRouterChatRequest {
 	presence_penalty?: number;
 	response_format?: {
 		type: 'text' | 'json_object';
-		schema?: Record<string, any>;
+		schema?: Record<string, unknown>;
 	};
 	tools?: OpenRouterTool[];
 	tool_choice?: 'none' | 'auto' | { type: 'function'; function: { name: string } };
@@ -79,7 +79,7 @@ export interface OpenRouterChatRequest {
 		require_parameters?: boolean;
 	};
 	usage?: {
-		include: boolean;  // For requesting usage information
+		include: boolean; // For requesting usage information
 	};
 }
 

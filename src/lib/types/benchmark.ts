@@ -8,8 +8,12 @@ export interface BenchmarkConfig {
 	userPrompt: string;
 	maxTokens?: number;
 	temperature?: number;
-	jsonSchema?: Record<string, any>;
-	toolDefinitions?: any[];
+	jsonSchema?: Record<string, unknown>;
+	toolDefinitions?: Array<{
+		name: string;
+		description: string;
+		parameters?: Record<string, unknown>;
+	}>;
 	files?: File[];
 }
 
@@ -45,6 +49,8 @@ export interface ModelResponse {
 	cost?: number;
 	latencyMs?: number;
 	openRouterLatencyMs?: number;
+	generationTimeMs?: number;
+	moderationLatencyMs?: number;
 	timeToFirstTokenMs?: number;
 	tokensPerSecond?: number;
 	startedAt?: Date;

@@ -69,6 +69,8 @@ CREATE TABLE IF NOT EXISTS model_responses (
   cost DOUBLE,
   latency_ms INTEGER,
   openrouter_latency_ms INTEGER,
+  generation_time_ms INTEGER,
+  moderation_latency_ms INTEGER,
   time_to_first_token_ms INTEGER,
   tokens_per_second DECIMAL(10, 2),
   evaluation_score DECIMAL(5, 2),

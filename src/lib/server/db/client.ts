@@ -33,7 +33,7 @@ class DuckDBClient {
 		return this.connection;
 	}
 
-	async query<T = any>(sql: string, params?: any[]): Promise<T[]> {
+	async query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]> {
 		const conn = await this.connect();
 
 		if (params && params.length > 0) {
@@ -57,7 +57,7 @@ class DuckDBClient {
 			const columns = result.columnNames();
 			const rawRows = await result.getRows();
 			const data = rawRows.map((row) => {
-				const obj: any = {};
+				const obj: Record<string, unknown> = {};
 				columns.forEach((col, idx) => {
 					obj[col] = row[idx];
 				});
@@ -71,7 +71,7 @@ class DuckDBClient {
 			const columns = result.columnNames();
 			const rawRows = await result.getRows();
 			const data = rawRows.map((row) => {
-				const obj: any = {};
+				const obj: Record<string, unknown> = {};
 				columns.forEach((col, idx) => {
 					obj[col] = row[idx];
 				});
@@ -127,18 +127,18 @@ export class SimplifiedDBClient {
 	}
 
 	// Helper to convert BigInt values to numbers for JSON serialization
-	private serializeBigInt(obj: any): any {
-		return JSON.parse(JSON.stringify(obj, (key, value) =>
-			typeof value === 'bigint' ? Number(value) : value
-		));
+	private serializeBigInt(obj: unknown): unknown {
+		return JSON.parse(
+			JSON.stringify(obj, (key, value) => (typeof value === 'bigint' ? Number(value) : value))
+		);
 	}
 
-	async all(sql: string, params?: any[]): Promise<any[]> {
+	async all(sql: string, params?: unknown[]): Promise<unknown[]> {
 		const results = await this.client.query(sql, params);
-		return results.map(r => this.serializeBigInt(r));
+		return results.map((r) => this.serializeBigInt(r));
 	}
 
-	async run(sql: string, params?: any[]): Promise<void> {
+	async run(sql: string, params?: unknown[]): Promise<void> {
 		if (params) {
 			await this.client.query(sql, params);
 		} else {
@@ -147,11 +147,11 @@ export class SimplifiedDBClient {
 	}
 
 	async prepare(sql: string): Promise<{
-		run: (params: any[]) => Promise<void>;
+		run: (params: unknown[]) => Promise<void>;
 		finalize: () => Promise<void>;
 	}> {
 		return {
-			run: async (params: any[]) => {
+			run: async (params: unknown[]) => {
 				await this.client.query(sql, params);
 			},
 			finalize: async () => {
