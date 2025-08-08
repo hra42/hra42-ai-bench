@@ -45,6 +45,20 @@ export function isValidImageFile(file: File): boolean {
 }
 
 /**
+ * Validate if a file is a PDF
+ */
+export function isValidPDFFile(file: File): boolean {
+	return file.type === 'application/pdf';
+}
+
+/**
+ * Validate if a file is an accepted document type (image or PDF)
+ */
+export function isValidDocumentFile(file: File): boolean {
+	return isValidImageFile(file) || isValidPDFFile(file);
+}
+
+/**
  * Process an image file for API submission
  */
 export async function processImageForApi(file: File): Promise<{
@@ -65,4 +79,49 @@ export async function processImageForApi(file: File): Promise<{
 		mimeType,
 		base64Content
 	};
+}
+
+/**
+ * Process a PDF file for API submission
+ */
+export async function processPDFForApi(file: File): Promise<{
+	dataUrl: string;
+	mimeType: string;
+	base64Content: string;
+}> {
+	if (!isValidPDFFile(file)) {
+		throw new Error(`Invalid file type: ${file.type}. Expected PDF file`);
+	}
+
+	const dataUrl = await fileToBase64(file);
+	const mimeType = getMimeTypeFromDataUrl(dataUrl);
+	const base64Content = extractBase64Content(dataUrl);
+
+	return {
+		dataUrl,
+		mimeType,
+		base64Content
+	};
+}
+
+/**
+ * Process a document file (image or PDF) for API submission
+ */
+export async function processDocumentForApi(file: File): Promise<{
+	dataUrl: string;
+	mimeType: string;
+	base64Content: string;
+	fileType: 'image' | 'pdf';
+}> {
+	if (isValidImageFile(file)) {
+		const result = await processImageForApi(file);
+		return { ...result, fileType: 'image' };
+	} else if (isValidPDFFile(file)) {
+		const result = await processPDFForApi(file);
+		return { ...result, fileType: 'pdf' };
+	} else {
+		throw new Error(
+			`Invalid file type: ${file.type}. Accepted types: JPEG, PNG, WebP, GIF, PDF`
+		);
+	}
 }
