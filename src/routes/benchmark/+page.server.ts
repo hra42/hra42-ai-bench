@@ -7,11 +7,11 @@ export const load: PageServerLoad = async () => {
 		// Always fetch fresh models from OpenRouter for now
 		const client = getOpenRouterClient();
 		const openRouterModels = await client.getModels();
-		
+
 		// Filter and transform models
 		const models = openRouterModels
-			.filter(model => model.pricing && model.id && model.name)
-			.map(model => ({
+			.filter((model) => model.pricing && model.id && model.name)
+			.map((model) => ({
 				id: model.id,
 				name: model.name,
 				description: model.description || '',
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async () => {
 		`);
 
 		const result = {
-			models: models.map(m => ({
+			models: models.map((m) => ({
 				id: String(m.id),
 				name: String(m.name),
 				description: String(m.description || ''),
@@ -61,7 +61,7 @@ export const load: PageServerLoad = async () => {
 				toolDefinitions: t.tool_definitions || ''
 			}))
 		};
-		
+
 		return result;
 	} catch (error) {
 		console.error('Error loading benchmark data:', error);

@@ -5,13 +5,14 @@
 	export let data: PageData;
 
 	// Transform models data for the interface
-	$: availableModels = data.models?.map((m) => ({
-		id: m.id,
-		name: m.name,
-		provider: m.id.split('/')[0] || 'Unknown',
-		pricingPrompt: m.pricingPrompt,
-		pricingCompletion: m.pricingCompletion
-	})) || [];
+	$: availableModels =
+		data.models?.map((m) => ({
+			id: m.id,
+			name: m.name,
+			provider: m.id.split('/')[0] || 'Unknown',
+			pricingPrompt: m.pricingPrompt,
+			pricingCompletion: m.pricingCompletion
+		})) || [];
 
 	let selectedModels: string[] = [];
 	let benchmarkName = '';

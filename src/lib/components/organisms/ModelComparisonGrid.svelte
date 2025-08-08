@@ -25,10 +25,7 @@
 
 	export let columns: 'auto' | 1 | 2 | 3 | 4 = 'auto';
 
-	$: gridClass =
-		columns === 'auto'
-			? 'grid-cols-1 lg:grid-cols-2'
-			: `grid-cols-${columns}`;
+	$: gridClass = columns === 'auto' ? 'grid-cols-1 lg:grid-cols-2' : `grid-cols-${columns}`;
 </script>
 
 <div class="grid {gridClass} gap-6">
