@@ -5,6 +5,8 @@
 	export let lines = 3;
 	export let showHeader = true;
 	export let showFooter = false;
+
+	$: lineArray = Array.from({ length: lines }, (_, i) => i);
 </script>
 
 <Card>
@@ -17,7 +19,7 @@
 		{/if}
 
 		<div class="space-y-2">
-			{#each Array(lines) as _, i}
+			{#each lineArray as i (i)}
 				<Skeleton width={i === lines - 1 ? '60%' : '100%'} height="1rem" />
 			{/each}
 		</div>

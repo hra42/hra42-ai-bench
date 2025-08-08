@@ -119,7 +119,7 @@
 
 	{#if files.length > 0}
 		<div class="space-y-2">
-			{#each files as file, index}
+			{#each files as file, index (file.name + index)}
 				<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
 					<div class="flex items-center gap-3">
 						<svg

@@ -45,7 +45,7 @@
 		<slot name="placeholder">
 			<option value="" disabled selected>Select an option</option>
 		</slot>
-		{#each options as option}
+		{#each options as option (option.value)}
 			<option value={option.value}>{option.label}</option>
 		{/each}
 	</select>

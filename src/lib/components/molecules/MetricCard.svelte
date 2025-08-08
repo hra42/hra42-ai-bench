@@ -31,6 +31,7 @@
 		</div>
 		{#if icon}
 			<div class="ml-4 {iconColors[variant]}">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html icon}
 			</div>
 		{/if}

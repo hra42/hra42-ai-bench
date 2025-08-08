@@ -104,7 +104,7 @@
 			</div>
 		{:else}
 			<div class="max-h-96 space-y-2 overflow-y-auto rounded-lg border border-slate-200 p-2">
-				{#each filteredModels as model}
+				{#each filteredModels as model (model.id)}
 					<button
 						on:click={() => toggleModel(model.id)}
 						class="w-full rounded-lg border p-3 text-left transition-colors

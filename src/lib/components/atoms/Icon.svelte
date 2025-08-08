@@ -36,5 +36,6 @@
 	stroke="currentColor"
 	aria-hidden="true"
 >
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html icons[name] || ''}
 </svg>

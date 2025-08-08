@@ -15,7 +15,7 @@
 		if (typeof cost !== 'number' || isNaN(cost)) {
 			return '$0.0000';
 		}
-		
+
 		// Handle very small numbers (scientific notation)
 		if (cost > 0 && cost < 0.0001) {
 			// Use more decimal places for very small numbers
@@ -26,7 +26,7 @@
 				maximumFractionDigits: 8
 			}).format(cost);
 		}
-		
+
 		// Normal formatting for regular numbers
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -48,8 +48,10 @@
 	{#if showTrend && previousCost !== undefined && trend !== 0}
 		<span
 			class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium
-				{trendDirection === 'up' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : ''}
-				{trendDirection === 'down' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : ''}"
+				{trendDirection === 'up' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}
+				{trendDirection === 'down'
+				? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+				: ''}"
 		>
 			{#if trendDirection === 'up'}
 				<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

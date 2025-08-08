@@ -12,6 +12,7 @@
 
 <div class="py-12 text-center">
 	<div class="mx-auto mb-4 h-16 w-16 text-slate-400">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html icon}
 	</div>
 

@@ -52,6 +52,7 @@
 		<div class="flex">
 			<div class="flex-shrink-0">
 				<div class="h-5 w-5 {config.text}">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html config.icon}
 				</div>
 			</div>

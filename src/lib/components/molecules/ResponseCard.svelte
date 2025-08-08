@@ -72,13 +72,23 @@
 						OR: {formatDuration(response.openRouterLatencyMs)}
 					</span>
 				{/if}
+				{#if response.generationTimeMs}
+					<span title="Model generation time" class="text-green-600">
+						Gen: {formatDuration(response.generationTimeMs)}
+					</span>
+				{/if}
+				{#if response.moderationLatencyMs}
+					<span title="Moderation latency" class="text-amber-600">
+						Mod: {formatDuration(response.moderationLatencyMs)}
+					</span>
+				{/if}
 				{#if response.latencyMs && response.openRouterLatencyMs}
 					<span title="Network overhead" class="text-slate-500">
 						Network: {formatDuration(response.latencyMs - response.openRouterLatencyMs)}
 					</span>
 				{/if}
 				{#if response.timeToFirstTokenMs}
-					<span title="Time to first token"
+					<span title="Time to first token" class="text-purple-600"
 						>TTFT: {formatDuration(response.timeToFirstTokenMs)}</span
 					>
 				{/if}
@@ -98,7 +108,9 @@
 				<div class="prose prose-sm max-w-none">
 					<pre
 						class="overflow-x-auto rounded bg-slate-50 p-3 text-sm whitespace-pre-wrap text-slate-800">
-{response.responseText}{#if response.status === 'running'}<span class="inline-block w-2 h-4 bg-slate-600 animate-pulse ml-0.5" />{/if}</pre>
+{response.responseText}{#if response.status === 'running'}<span
+								class="ml-0.5 inline-block h-4 w-2 animate-pulse bg-slate-600"
+							/>{/if}</pre>
 				</div>
 			{:else if response.status === 'running'}
 				<div class="flex items-center gap-2 text-slate-600">
