@@ -141,8 +141,31 @@
 									}}
 								/>
 							</div>
+						{:else if file.type === 'application/pdf'}
+							<!-- PDF file icon -->
+							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900">
+								<svg
+									class="h-6 w-6 text-red-600 dark:text-red-400"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+									/>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12h6m-6 4h6"
+									/>
+								</svg>
+							</div>
 						{:else}
-							<!-- Default file icon for non-image files -->
+							<!-- Default file icon for other files -->
 							<svg
 								class="h-5 w-5 text-slate-400"
 								fill="none"
