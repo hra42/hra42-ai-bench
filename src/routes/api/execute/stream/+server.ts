@@ -7,11 +7,17 @@ export const POST: RequestHandler = async ({ request }) => {
 	const {
 		config,
 		modelIds,
-		imageData
+		imageData,
+		documentData
 	}: {
 		config: BenchmarkConfig;
 		modelIds: string[];
 		imageData?: string; // Base64 encoded image data URL
+		documentData?: {
+			dataUrl: string;
+			fileType: 'pdf' | 'image';
+			fileName?: string;
+		}; // Document data for vision/document benchmarks
 	} = await request.json();
 
 	if (!config || !modelIds || modelIds.length === 0) {
@@ -103,9 +109,47 @@ export const POST: RequestHandler = async ({ request }) => {
 							messages.push({ role: 'system', content: config.systemPrompt });
 						}
 
-						// Handle vision benchmarks with images
-						if (config.type === 'vision' && imageData) {
+						// Handle document benchmarks with PDFs or vision benchmarks with images
+						if (config.type === 'document' && documentData) {
+							// For document processing, use the file content type
+							if (documentData.fileType === 'pdf') {
+								messages.push({
+									role: 'user',
+									content: [
+										{
+											type: 'text',
+											text: config.userPrompt
+										},
+										{
+											type: 'file',
+											file: {
+												filename: documentData.fileName || 'document.pdf',
+												file_data: documentData.dataUrl
+											}
+										}
+									]
+								});
+							} else {
+								// Image in document benchmark
+								messages.push({
+									role: 'user',
+									content: [
+										{
+											type: 'text',
+											text: config.userPrompt
+										},
+										{
+											type: 'image_url',
+											image_url: {
+												url: documentData.dataUrl
+											}
+										}
+									]
+								});
+							}
+						} else if (config.type === 'vision' && (imageData || documentData)) {
 							// For vision models, use multi-part content with text and image
+							const imageUrl = imageData || documentData?.dataUrl;
 							messages.push({
 								role: 'user',
 								content: [
@@ -116,7 +160,7 @@ export const POST: RequestHandler = async ({ request }) => {
 									{
 										type: 'image_url',
 										image_url: {
-											url: imageData // This should be a data URL or https URL
+											url: imageUrl // This should be a data URL or https URL
 										}
 									}
 								]
@@ -132,6 +176,18 @@ export const POST: RequestHandler = async ({ request }) => {
 							max_tokens: config.maxTokens || 1000,
 							temperature: config.temperature || 0.7
 						};
+
+						// Add PDF processing plugin configuration if dealing with PDFs
+						if (config.type === 'document' && documentData?.fileType === 'pdf') {
+							chatRequest.plugins = [
+								{
+									id: 'file-parser',
+									pdf: {
+										engine: 'pdf-text' // Use the free pdf-text engine by default
+									}
+								}
+							];
+						}
 
 						// Add structured output formatting if applicable
 						if (config.type === 'structured' && config.jsonSchema) {
