@@ -146,6 +146,23 @@ async function processModels(
 				}
 			}
 
+			// Add tool definitions for function calling
+			if (config.type === 'tool' && config.toolDefinitions) {
+				try {
+					const tools =
+						typeof config.toolDefinitions === 'string'
+							? JSON.parse(config.toolDefinitions)
+							: config.toolDefinitions;
+
+					// Ensure tools are in the correct format
+					chatRequest.tools = Array.isArray(tools) ? tools : [tools];
+					// Let the model decide when to use tools
+					chatRequest.tool_choice = 'auto';
+				} catch (e) {
+					console.error('Invalid tool definitions:', e);
+				}
+			}
+
 			// Make API call with usage accounting
 			const response = await client.chat(chatRequest);
 
@@ -155,18 +172,32 @@ async function processModels(
 			const cost = response.usage?.cost || 0;
 			totalCost += cost;
 
-			// Extract response content
-			const messageContent = response.choices?.[0]?.message?.content;
+			// Extract response content and tool calls
+			const message = response.choices?.[0]?.message;
+			const messageContent = message?.content;
 			let responseContent =
 				typeof messageContent === 'string' ? messageContent : JSON.stringify(messageContent) || '';
+
+			// Handle tool calls for function calling benchmarks
+			let toolCallsJson = null;
+			if (config.type === 'tool' && message?.tool_calls) {
+				toolCallsJson = JSON.stringify(message.tool_calls);
+				// If there are tool calls but no content, create a summary
+				if (!responseContent || responseContent.trim() === '') {
+					const toolNames = message.tool_calls.map((tc: any) => tc.function?.name).join(', ');
+					responseContent = `Model requested tool calls: ${toolNames}`;
+				}
+			}
 
 			// Check if response is empty
 			if (!responseContent || responseContent.trim() === '') {
 				console.warn(`Model ${modelId} returned empty response`);
-				// Store a message about empty response for structured outputs
+				// Store a message about empty response
 				if (config.type === 'structured') {
 					responseContent =
 						'{"error": "Model returned empty response - may not support structured outputs"}';
+				} else if (config.type === 'tool') {
+					responseContent = 'Model returned empty response - may not support function calling';
 				}
 			}
 

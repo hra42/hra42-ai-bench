@@ -126,6 +126,22 @@ export const POST: RequestHandler = async ({ request }) => {
 							}
 						}
 
+						// Add tool definitions for function calling
+						if (config.type === 'tool' && config.toolDefinitions) {
+							try {
+								const tools =
+									typeof config.toolDefinitions === 'string'
+										? JSON.parse(config.toolDefinitions)
+										: config.toolDefinitions;
+
+								// Ensure tools are in the correct format
+								chatRequest.tools = Array.isArray(tools) ? tools : [tools];
+								chatRequest.tool_choice = 'auto';
+							} catch (e) {
+								console.error('Invalid tool definitions:', e);
+							}
+						}
+
 						// Stream the response
 						const streamResponse = await client.chatStream(chatRequest);
 
