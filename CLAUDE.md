@@ -91,6 +91,7 @@ DuckDB tables:
 
 4. **Environment Variables**:
    - `OPENROUTER_API_KEY` - Required for API access
+   - `OPENROUTER_BASE_URL` - API base URL (defaults to `https://openrouter.ai/api/v1`)
    - `DATABASE_PATH` - DuckDB file location (defaults to `data/hra42.duckdb`)
 
 5. **Performance Considerations**:
