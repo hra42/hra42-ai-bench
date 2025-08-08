@@ -212,18 +212,38 @@
 		});
 
 		try {
-			// Process images for vision benchmarks
+			// Process files for vision and document benchmarks
 			let imageData: string | undefined;
-			if (config.benchmarkType === 'vision' && config.files && config.files.length > 0) {
-				const file = config.files[0]; // Use the first image
-				if (file.type.startsWith('image/')) {
-					// Convert image to base64 data URL
-					const reader = new FileReader();
-					imageData = await new Promise((resolve, reject) => {
-						reader.onloadend = () => resolve(reader.result as string);
-						reader.onerror = reject;
-						reader.readAsDataURL(file);
-					});
+			let documentData: { dataUrl: string; fileType: 'pdf' | 'image'; fileName?: string } | undefined;
+			
+			if ((config.benchmarkType === 'vision' || config.benchmarkType === 'document') && config.files && config.files.length > 0) {
+				const file = config.files[0]; // Use the first file
+				
+				// Convert file to base64 data URL
+				const reader = new FileReader();
+				const dataUrl = await new Promise<string>((resolve, reject) => {
+					reader.onloadend = () => resolve(reader.result as string);
+					reader.onerror = reject;
+					reader.readAsDataURL(file);
+				});
+				
+				// Determine file type and set appropriate data
+				if (file.type === 'application/pdf') {
+					documentData = {
+						dataUrl,
+						fileType: 'pdf',
+						fileName: file.name
+					};
+				} else if (file.type.startsWith('image/')) {
+					if (config.benchmarkType === 'document') {
+						documentData = {
+							dataUrl,
+							fileType: 'image',
+							fileName: file.name
+						};
+					} else {
+						imageData = dataUrl;
+					}
 				}
 			}
 
@@ -246,7 +266,8 @@
 							config.benchmarkType === 'tool' ? config.functionDefinitions : undefined
 					},
 					modelIds: config.selectedModels,
-					imageData // Include image data for vision benchmarks
+					imageData, // Include image data for vision benchmarks
+					documentData // Include document data for document benchmarks
 				})
 			});
 
