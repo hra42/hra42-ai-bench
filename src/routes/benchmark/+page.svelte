@@ -218,7 +218,8 @@
 						systemPrompt: config.systemPrompt,
 						userPrompt: config.prompt,
 						maxTokens: config.maxTokens,
-						temperature: config.temperature
+						temperature: config.temperature,
+						jsonSchema: config.benchmarkType === 'structured' ? config.jsonSchema : undefined
 					},
 					modelIds: config.selectedModels
 				})
