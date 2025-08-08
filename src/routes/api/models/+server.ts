@@ -39,7 +39,7 @@ export const GET: RequestHandler = async () => {
 						prompt: Number(model.pricingPrompt || 0),
 						completion: Number(model.pricingCompletion || 0)
 					},
-					topProvider: model.topProvider || null,
+					topProvider: model.topProvider ? String(model.topProvider) : null,
 					supportsTools: Boolean(model.supportsTools),
 					supportsVision: Boolean(model.supportsVision),
 					supportsJsonOutput: Boolean(model.supportsJsonOutput)

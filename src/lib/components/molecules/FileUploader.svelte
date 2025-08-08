@@ -65,9 +65,12 @@
 		tabindex="0"
 		class="relative rounded-lg border-2 border-dashed p-6 text-center transition-colors"
 		class:border-slate-300={!dragActive}
+		class:dark:border-slate-600={!dragActive}
 		class:bg-slate-50={!dragActive}
+		class:dark:bg-slate-800={!dragActive}
 		class:border-blue-500={dragActive}
 		class:bg-blue-50={dragActive}
+		class:dark:bg-blue-900={dragActive}
 		on:dragover|preventDefault={() => (dragActive = true)}
 		on:dragleave|preventDefault={() => (dragActive = false)}
 		on:drop={handleDrop}
@@ -120,29 +123,71 @@
 	{#if files.length > 0}
 		<div class="space-y-2">
 			{#each files as file, index (file.name + index)}
-				<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+				<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
 					<div class="flex items-center gap-3">
-						<svg
-							class="h-5 w-5 text-slate-400"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-							/>
-						</svg>
+						{#if file.type.startsWith('image/')}
+							<!-- Show image preview for image files -->
+							<div class="h-12 w-12 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-700">
+								<img
+									src={URL.createObjectURL(file)}
+									alt={file.name}
+									class="h-full w-full object-cover"
+									on:load={(e) => {
+										// Revoke the object URL after the image loads to free memory
+										const img = e.target;
+										if (img instanceof HTMLImageElement) {
+											setTimeout(() => URL.revokeObjectURL(img.src), 100);
+										}
+									}}
+								/>
+							</div>
+						{:else if file.type === 'application/pdf'}
+							<!-- PDF file icon -->
+							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900">
+								<svg
+									class="h-6 w-6 text-red-600 dark:text-red-400"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+									/>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12h6m-6 4h6"
+									/>
+								</svg>
+							</div>
+						{:else}
+							<!-- Default file icon for other files -->
+							<svg
+								class="h-5 w-5 text-slate-400"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+								/>
+							</svg>
+						{/if}
 						<div>
-							<p class="text-sm font-medium text-slate-900">{file.name}</p>
-							<p class="text-xs text-slate-500">{formatFileSize(file.size)}</p>
+							<p class="text-sm font-medium text-slate-900 dark:text-white">{file.name}</p>
+							<p class="text-xs text-slate-500 dark:text-slate-400">{formatFileSize(file.size)}</p>
 						</div>
 					</div>
 					<button
 						type="button"
-						class="text-slate-400 hover:text-slate-600"
+						class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
 						aria-label="Remove file"
 						on:click={() => removeFile(index)}
 					>

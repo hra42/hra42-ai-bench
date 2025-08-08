@@ -31,11 +31,18 @@
 		status: 'pending' | 'running' | 'completed' | 'failed';
 		response?: string;
 		responseId?: string;
+		responseJson?: string;
+		toolCalls?: string;
 		error?: string;
 		duration?: number;
 		cost?: number;
 		inputTokens?: number;
 		outputTokens?: number;
+		timeToFirstTokenMs?: number;
+		openRouterLatencyMs?: number;
+		generationTimeMs?: number;
+		moderationLatencyMs?: number;
+		tokensPerSecond?: number;
 	}> = [];
 	let costBreakdown: Array<{
 		name: string;
@@ -47,7 +54,7 @@
 	}> = [];
 	let isRunning = false;
 
-	function handleStreamEvent(eventType: string, data: Record<string, unknown>) {
+	function handleStreamEvent(eventType: string, data: any) {
 		switch (eventType) {
 			case 'run_started':
 				break;
@@ -205,6 +212,41 @@
 		});
 
 		try {
+			// Process files for vision and document benchmarks
+			let imageData: string | undefined;
+			let documentData: { dataUrl: string; fileType: 'pdf' | 'image'; fileName?: string } | undefined;
+			
+			if ((config.benchmarkType === 'vision' || config.benchmarkType === 'document') && config.files && config.files.length > 0) {
+				const file = config.files[0]; // Use the first file
+				
+				// Convert file to base64 data URL
+				const reader = new FileReader();
+				const dataUrl = await new Promise<string>((resolve, reject) => {
+					reader.onloadend = () => resolve(reader.result as string);
+					reader.onerror = reject;
+					reader.readAsDataURL(file);
+				});
+				
+				// Determine file type and set appropriate data
+				if (file.type === 'application/pdf') {
+					documentData = {
+						dataUrl,
+						fileType: 'pdf',
+						fileName: file.name
+					};
+				} else if (file.type.startsWith('image/')) {
+					if (config.benchmarkType === 'document') {
+						documentData = {
+							dataUrl,
+							fileType: 'image',
+							fileName: file.name
+						};
+					} else {
+						imageData = dataUrl;
+					}
+				}
+			}
+
 			// Use streaming endpoint for real-time updates
 			const response = await fetch('/api/execute/stream', {
 				method: 'POST',
@@ -218,9 +260,14 @@
 						systemPrompt: config.systemPrompt,
 						userPrompt: config.prompt,
 						maxTokens: config.maxTokens,
-						temperature: config.temperature
+						temperature: config.temperature,
+						jsonSchema: config.benchmarkType === 'structured' ? config.jsonSchema : undefined,
+						toolDefinitions:
+							config.benchmarkType === 'tool' ? config.functionDefinitions : undefined
 					},
-					modelIds: config.selectedModels
+					modelIds: config.selectedModels,
+					imageData, // Include image data for vision benchmarks
+					documentData // Include document data for document benchmarks
 				})
 			});
 
@@ -278,7 +325,7 @@
 		isRunning = false;
 		responses = responses.map((r) => ({
 			...r,
-			status: r.status === 'running' ? 'cancelled' : r.status
+			status: r.status === 'running' ? 'failed' : r.status
 		}));
 	}
 </script>

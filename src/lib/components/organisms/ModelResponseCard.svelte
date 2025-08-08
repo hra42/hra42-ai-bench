@@ -6,6 +6,8 @@
 	import TokenCounter from '../molecules/TokenCounter.svelte';
 	import StatusIndicator from '../molecules/StatusIndicator.svelte';
 	import ResponseViewer from './ResponseViewer.svelte';
+	import JsonResponseViewer from '../molecules/JsonResponseViewer.svelte';
+	import FunctionCallViewer from '../molecules/FunctionCallViewer.svelte';
 
 	export let modelName: string;
 	export let provider: string;
@@ -18,6 +20,9 @@
 	export let outputTokens: number | undefined = undefined;
 	export let maxTokens: number | undefined = undefined;
 	export let responseFormat: 'text' | 'json' | 'markdown' | 'code' = 'text';
+	export let benchmarkType: 'text' | 'structured' | 'tool' | 'vision' | 'document' = 'text';
+	export let jsonSchema: string | null = null;
+	export let toolCalls: string | null = null;
 	export let expanded = false;
 
 	function toggleExpanded() {
@@ -50,20 +55,40 @@
 			</div>
 		</div>
 
-		{#if status === 'completed' && response}
+		{#if status === 'completed' && (response || toolCalls)}
 			{#if !expanded}
-				<div class="relative max-h-32 overflow-hidden rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-					<pre
-						class="font-mono text-sm whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.slice(
-							0,
-							200
-						)}{response.length > 200 ? '...' : ''}</pre>
-					{#if response.length > 200}
-						<div
-							class="absolute right-0 bottom-0 left-0 h-8 bg-gradient-to-t from-slate-50 to-transparent dark:from-slate-800"
-						/>
-					{/if}
-				</div>
+				{#if benchmarkType === 'tool' && toolCalls}
+					<div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+						<FunctionCallViewer {toolCalls} compact={true} />
+					</div>
+				{:else}
+					<div
+						class="relative max-h-32 overflow-hidden rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
+					>
+						<pre
+							class="font-mono text-sm whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.slice(
+								0,
+								200
+							)}{response.length > 200 ? '...' : ''}</pre>
+						{#if response.length > 200}
+							<div
+								class="absolute right-0 bottom-0 left-0 h-8 bg-gradient-to-t from-slate-50 to-transparent dark:from-slate-800"
+							/>
+						{/if}
+					</div>
+				{/if}
+			{:else if benchmarkType === 'structured'}
+				<JsonResponseViewer {response} schema={jsonSchema} {modelName} />
+			{:else if benchmarkType === 'tool'}
+				<FunctionCallViewer {toolCalls} compact={false} />
+				{#if response}
+					<div class="mt-4">
+						<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+							Response Text
+						</div>
+						<ResponseViewer content={response} format={responseFormat} maxHeight="400px" />
+					</div>
+				{/if}
 			{:else}
 				<ResponseViewer content={response} format={responseFormat} maxHeight="600px" />
 			{/if}

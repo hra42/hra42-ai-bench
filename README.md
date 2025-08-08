@@ -332,11 +332,10 @@ graph TD
 
 ### Phase 4: Advanced Benchmarks (Week 4)
 
-- [ ] Structured output benchmarking
-- [ ] Function calling benchmarks
-- [ ] Image upload and processing
-- [ ] PDF handling
-- [ ] Multi-modal comparisons
+- [x] Structured output benchmarking
+- [x] Function calling benchmarks
+- [x] Image upload and processing
+- [x] PDF handling
 
 ### Phase 5: Analytics & Polish (Week 5)
 
@@ -411,9 +410,10 @@ graph TD
 
 ### Environment Variables
 
-- OPENROUTER_API_KEY configuration
-- DATABASE_PATH for DuckDB location
-- PUBLIC_APP_NAME for branding
+- `OPENROUTER_API_KEY` - Your OpenRouter API key (required)
+- `OPENROUTER_BASE_URL` - API base URL (optional, defaults to `https://openrouter.ai/api/v1`)
+- `DATABASE_PATH` - DuckDB database file location (optional, defaults to `data/hra42.duckdb`)
+- `PUBLIC_APP_NAME` - Application name for branding (optional)
 
 ---
 

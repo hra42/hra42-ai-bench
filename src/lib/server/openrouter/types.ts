@@ -67,8 +67,12 @@ export interface OpenRouterChatRequest {
 	frequency_penalty?: number;
 	presence_penalty?: number;
 	response_format?: {
-		type: 'text' | 'json_object';
-		schema?: Record<string, unknown>;
+		type: 'text' | 'json_object' | 'json_schema';
+		json_schema?: {
+			name: string;
+			strict?: boolean;
+			schema: Record<string, unknown>;
+		};
 	};
 	tools?: OpenRouterTool[];
 	tool_choice?: 'none' | 'auto' | { type: 'function'; function: { name: string } };

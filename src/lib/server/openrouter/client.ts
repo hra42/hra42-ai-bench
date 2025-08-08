@@ -1,13 +1,16 @@
 import { env } from '$env/dynamic/private';
 import type { OpenRouterModel, OpenRouterChatRequest, OpenRouterChatResponse } from './types';
 
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+const DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
 
 class OpenRouterClient {
 	private apiKey: string;
 	private baseUrl: string;
 
-	constructor(apiKey: string = env.OPENROUTER_API_KEY, baseUrl: string = OPENROUTER_BASE_URL) {
+	constructor(
+		apiKey: string = env.OPENROUTER_API_KEY,
+		baseUrl: string = env.OPENROUTER_BASE_URL || DEFAULT_BASE_URL
+	) {
 		if (!apiKey) {
 			throw new Error('OpenRouter API key is required');
 		}
@@ -85,7 +88,7 @@ class OpenRouterClient {
 		const cached = await db.all(`SELECT * FROM models WHERE id = ? LIMIT 1`, [modelId]);
 
 		if (cached.length > 0) {
-			const model = cached[0];
+			const model = cached[0] as any;
 			return {
 				id: model.id,
 				name: model.name,

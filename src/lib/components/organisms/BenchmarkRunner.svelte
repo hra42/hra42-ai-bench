@@ -88,7 +88,7 @@
 		}
 	}
 
-	function handleStreamEvent(event: string, data: unknown) {
+	function handleStreamEvent(event: string, data: any) {
 		switch (event) {
 			case 'run_started':
 				currentRun.set({

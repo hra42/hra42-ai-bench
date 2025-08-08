@@ -40,7 +40,7 @@ export const load: PageServerLoad = async () => {
 		`);
 
 		const result = {
-			models: models.map((m) => ({
+			models: models.map((m: any) => ({
 				id: String(m.id),
 				name: String(m.name),
 				description: String(m.description || ''),
