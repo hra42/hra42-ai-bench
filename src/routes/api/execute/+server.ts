@@ -6,8 +6,15 @@ import type { BenchmarkConfig } from '$lib/types/benchmark';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { config, modelIds }: { config: BenchmarkConfig; modelIds: string[] } =
-			await request.json();
+		const {
+			config,
+			modelIds,
+			imageData
+		}: {
+			config: BenchmarkConfig;
+			modelIds: string[];
+			imageData?: string; // Base64 encoded image data URL
+		} = await request.json();
 
 		if (!config || !modelIds || modelIds.length === 0) {
 			return json({ error: 'Invalid request' }, { status: 400 });
@@ -66,7 +73,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Start processing models sequentially
-		processModels(runId, config, modelIds, responseIds, client, db);
+		processModels(runId, config, modelIds, responseIds, client, db, imageData);
 
 		return json({
 			runId,
@@ -85,7 +92,8 @@ async function processModels(
 	modelIds: string[],
 	responseIds: Record<string, string>,
 	client: ReturnType<typeof getOpenRouterClient>,
-	db: SimplifiedDBClient
+	db: SimplifiedDBClient,
+	imageData?: string
 ) {
 	let completedCount = 0;
 	let totalCost = 0;
@@ -107,11 +115,32 @@ async function processModels(
 			const startTime = Date.now();
 
 			// Prepare messages
-			const messages: Array<{ role: string; content: string }> = [];
+			const messages: Array<{ role: string; content: string | Array<any> }> = [];
 			if (config.systemPrompt) {
 				messages.push({ role: 'system', content: config.systemPrompt });
 			}
-			messages.push({ role: 'user', content: config.userPrompt });
+
+			// Handle vision benchmarks with images
+			if (config.type === 'vision' && imageData) {
+				// For vision models, use multi-part content with text and image
+				messages.push({
+					role: 'user',
+					content: [
+						{
+							type: 'text',
+							text: config.userPrompt
+						},
+						{
+							type: 'image_url',
+							image_url: {
+								url: imageData // This should be a data URL or https URL
+							}
+						}
+					]
+				});
+			} else {
+				messages.push({ role: 'user', content: config.userPrompt });
+			}
 
 			// Prepare request with structured output support
 			const chatRequest: any = {
