@@ -1,7 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import Button from '../atoms/Button.svelte';
-
 	export let content: string;
 	export let format: 'text' | 'json' | 'markdown' | 'code' = 'text';
 	export let language = 'javascript';

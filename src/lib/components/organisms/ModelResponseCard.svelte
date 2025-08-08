@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Card from '../atoms/Card.svelte';
-	import Badge from '../atoms/Badge.svelte';
 	import Button from '../atoms/Button.svelte';
 	import CostDisplay from '../molecules/CostDisplay.svelte';
 	import ResponseTime from '../molecules/ResponseTime.svelte';
@@ -29,9 +28,14 @@
 <Card>
 	<div class="space-y-4">
 		<div class="flex items-start justify-between gap-2">
-			<div class="flex items-center gap-3 min-w-0 flex-1">
+			<div class="flex min-w-0 flex-1 items-center gap-3">
 				<div class="min-w-0 flex-1">
-					<h3 class="text-lg font-semibold text-slate-900 dark:text-white truncate" title={modelName}>{modelName}</h3>
+					<h3
+						class="truncate text-lg font-semibold text-slate-900 dark:text-white"
+						title={modelName}
+					>
+						{modelName}
+					</h3>
 					<p class="text-sm text-slate-500 dark:text-slate-400">{provider}</p>
 				</div>
 				<div class="flex-shrink-0">
@@ -48,14 +52,15 @@
 
 		{#if status === 'completed' && response}
 			{#if !expanded}
-				<div class="relative max-h-32 overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-800 p-3">
-					<pre class="font-mono text-sm whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.slice(
+				<div class="relative max-h-32 overflow-hidden rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+					<pre
+						class="font-mono text-sm whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.slice(
 							0,
 							200
 						)}{response.length > 200 ? '...' : ''}</pre>
 					{#if response.length > 200}
 						<div
-							class="absolute right-0 bottom-0 left-0 h-8 bg-gradient-to-t from-slate-50 dark:from-slate-800 to-transparent"
+							class="absolute right-0 bottom-0 left-0 h-8 bg-gradient-to-t from-slate-50 to-transparent dark:from-slate-800"
 						/>
 					{/if}
 				</div>
@@ -63,7 +68,9 @@
 				<ResponseViewer content={response} format={responseFormat} maxHeight="600px" />
 			{/if}
 
-			<div class="grid grid-cols-2 gap-4 border-t border-slate-200 dark:border-slate-700 pt-4 md:grid-cols-4">
+			<div
+				class="grid grid-cols-2 gap-4 border-t border-slate-200 pt-4 md:grid-cols-4 dark:border-slate-700"
+			>
 				{#if duration !== undefined}
 					<div>
 						<p class="mb-1 text-xs text-slate-500 dark:text-slate-400">Response Time</p>
@@ -81,14 +88,18 @@
 				{#if inputTokens !== undefined}
 					<div>
 						<p class="mb-1 text-xs text-slate-500 dark:text-slate-400">Input Tokens</p>
-						<p class="font-mono text-sm text-slate-900 dark:text-white">{inputTokens.toLocaleString()}</p>
+						<p class="font-mono text-sm text-slate-900 dark:text-white">
+							{inputTokens.toLocaleString()}
+						</p>
 					</div>
 				{/if}
 
 				{#if outputTokens !== undefined}
 					<div>
 						<p class="mb-1 text-xs text-slate-500 dark:text-slate-400">Output Tokens</p>
-						<p class="font-mono text-sm text-slate-900 dark:text-white">{outputTokens.toLocaleString()}</p>
+						<p class="font-mono text-sm text-slate-900 dark:text-white">
+							{outputTokens.toLocaleString()}
+						</p>
 					</div>
 				{/if}
 			</div>
@@ -99,7 +110,9 @@
 				</div>
 			{/if}
 		{:else if status === 'failed' && error}
-			<div class="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4">
+			<div
+				class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
+			>
 				<div class="flex items-start gap-3">
 					<svg
 						class="mt-0.5 h-5 w-5 text-red-500 dark:text-red-400"

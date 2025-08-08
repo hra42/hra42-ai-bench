@@ -72,7 +72,7 @@
 
 		<!-- Results Grid -->
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{#each $modelResponses as response}
+			{#each $modelResponses as response (response.modelId)}
 				<ResponseCard {response} model={$availableModels.find((m) => m.id === response.modelId)} />
 			{/each}
 		</div>

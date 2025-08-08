@@ -23,21 +23,21 @@
 		<h3 class="text-lg font-semibold text-slate-900 dark:text-white">Cost Breakdown</h3>
 
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-			<div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4">
+			<div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
 				<p class="text-sm font-medium text-blue-700 dark:text-blue-300">Input Costs</p>
 				<div class="mt-1 text-2xl font-bold text-blue-900 dark:text-blue-200">
 					<CostDisplay cost={totalInputCost} />
 				</div>
 			</div>
 
-			<div class="rounded-lg bg-green-50 dark:bg-green-900/20 p-4">
+			<div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
 				<p class="text-sm font-medium text-green-700 dark:text-green-300">Output Costs</p>
 				<div class="mt-1 text-2xl font-bold text-green-900 dark:text-green-200">
 					<CostDisplay cost={totalOutputCost} />
 				</div>
 			</div>
 
-			<div class="rounded-lg bg-slate-100 dark:bg-slate-800 p-4">
+			<div class="rounded-lg bg-slate-100 p-4 dark:bg-slate-800">
 				<p class="text-sm font-medium text-slate-700 dark:text-slate-300">Total Cost</p>
 				<div class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
 					<CostDisplay cost={grandTotal} />
@@ -48,8 +48,10 @@
 		<div class="space-y-2">
 			<h4 class="text-sm font-medium text-slate-700 dark:text-slate-300">Per Model Breakdown</h4>
 
-			{#each sortedModels as model}
-				<div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 py-2 last:border-0">
+			{#each sortedModels as model (model.name)}
+				<div
+					class="flex items-center justify-between border-b border-slate-100 py-2 last:border-0 dark:border-slate-700"
+				>
 					<div class="flex-1">
 						<p class="font-medium text-slate-900 dark:text-white">{model.name}</p>
 						<p class="text-xs text-slate-500 dark:text-slate-400">
@@ -74,10 +76,12 @@
 		</div>
 
 		{#if models.length > 1}
-			<div class="border-t border-slate-200 dark:border-slate-700 pt-4">
-				<h4 class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Cost Distribution</h4>
+			<div class="border-t border-slate-200 pt-4 dark:border-slate-700">
+				<h4 class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+					Cost Distribution
+				</h4>
 				<div class="flex h-8 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-700">
-					{#each sortedModels as model}
+					{#each sortedModels as model (model.name)}
 						{@const percentage = (model.totalCost / grandTotal) * 100}
 						<div
 							class="h-full transition-all duration-300"

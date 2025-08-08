@@ -186,7 +186,7 @@
 			</tr>
 		</thead>
 		<tbody class="divide-y divide-slate-200 bg-white">
-			{#each sortedBenchmarks as benchmark}
+			{#each sortedBenchmarks as benchmark (benchmark.id)}
 				<tr class="hover:bg-slate-50">
 					<td class="px-6 py-4 whitespace-nowrap">
 						<div class="text-sm font-medium text-slate-900">{benchmark.name}</div>
@@ -196,7 +196,7 @@
 					</td>
 					<td class="px-6 py-4">
 						<div class="flex flex-wrap gap-1">
-							{#each benchmark.models.slice(0, 3) as model}
+							{#each benchmark.models.slice(0, 3) as model (model)}
 								<Badge variant="secondary" size="sm">{model}</Badge>
 							{/each}
 							{#if benchmark.models.length > 3}

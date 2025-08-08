@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Button from '../atoms/Button.svelte';
 	import Card from '../atoms/Card.svelte';
 	import Input from '../atoms/Input.svelte';
 	import PromptInput from '../molecules/PromptInput.svelte';
@@ -19,8 +18,11 @@
 	const dispatch = createEventDispatcher();
 
 	type BenchmarkTypeKey = 'text' | 'structured' | 'tool' | 'vision' | 'document';
-	
-	const benchmarkTypeConfig: Record<BenchmarkTypeKey, { label: string; icon: string; description: string }> = {
+
+	const benchmarkTypeConfig: Record<
+		BenchmarkTypeKey,
+		{ label: string; icon: string; description: string }
+	> = {
 		text: {
 			label: 'Text Generation',
 			icon: '📝',
@@ -58,10 +60,12 @@
 	<div>
 		<h3 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Select Benchmark Type</h3>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
-			{#each Object.entries(benchmarkTypeConfig) as [type, config]}
+			{#each Object.entries(benchmarkTypeConfig) as [type, config] (type)}
 				<button
 					class="rounded-lg border-2 p-4 text-left transition-all
-						{benchmarkType === type ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'}"
+						{benchmarkType === type
+						? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+						: 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600'}"
 					on:click={() => selectBenchmarkType(type as BenchmarkTypeKey)}
 				>
 					<div class="mb-2 text-2xl">{config.icon}</div>
@@ -79,16 +83,19 @@
 			<!-- Common configuration fields -->
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
 				<div>
-					<Input 
-						label="Benchmark Name" 
-						bind:value={benchmarkName} 
+					<Input
+						label="Benchmark Name"
+						bind:value={benchmarkName}
 						placeholder="e.g., GPT-4 vs Claude Comparison"
 						hint="Give your benchmark a descriptive name"
 					/>
 				</div>
 				<div class="grid grid-cols-2 gap-4">
 					<div>
-						<label for="temperature" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+						<label
+							for="temperature"
+							class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
+						>
 							Temperature
 						</label>
 						<input
@@ -98,11 +105,14 @@
 							min="0"
 							max="2"
 							step="0.1"
-							class="w-full px-3 py-2 border rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
 						/>
 					</div>
 					<div>
-						<label for="maxTokens" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+						<label
+							for="maxTokens"
+							class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
+						>
 							Max Tokens
 						</label>
 						<input
@@ -112,7 +122,7 @@
 							min="1"
 							max="32000"
 							step="100"
-							class="w-full px-3 py-2 border rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
 						/>
 					</div>
 				</div>
@@ -120,8 +130,8 @@
 
 			<div>
 				<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">System Prompt</div>
-				<PromptInput 
-					bind:value={systemPrompt} 
+				<PromptInput
+					bind:value={systemPrompt}
 					placeholder="Enter system instructions (optional)..."
 					rows={3}
 				/>
@@ -137,14 +147,21 @@
 			{#if benchmarkType === 'structured'}
 				<div>
 					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">User Prompt</div>
-					<PromptInput bind:value={prompt} placeholder="Enter your prompt for structured output..." />
+					<PromptInput
+						bind:value={prompt}
+						placeholder="Enter your prompt for structured output..."
+					/>
 				</div>
 				<div>
-					<label for="json-schema" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">JSON Schema</label>
+					<label
+						for="json-schema"
+						class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+						>JSON Schema</label
+					>
 					<textarea
 						id="json-schema"
 						bind:value={jsonSchema}
-						class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+						class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
 						rows="8"
 						placeholder={'{"type": "object", "properties": { ... }}'}
 					></textarea>
@@ -154,14 +171,21 @@
 			{#if benchmarkType === 'tool'}
 				<div>
 					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">User Prompt</div>
-					<PromptInput bind:value={prompt} placeholder="Enter your prompt for function calling..." />
+					<PromptInput
+						bind:value={prompt}
+						placeholder="Enter your prompt for function calling..."
+					/>
 				</div>
 				<div>
-					<label for="function-defs" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Function Definitions</label>
+					<label
+						for="function-defs"
+						class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+						>Function Definitions</label
+					>
 					<textarea
 						id="function-defs"
 						bind:value={functionDefinitions}
-						class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+						class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
 						rows="8"
 						placeholder={'[{"name": "function_name", "parameters": {...}}]'}
 					></textarea>
@@ -170,7 +194,9 @@
 
 			{#if benchmarkType === 'vision'}
 				<div>
-					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Upload Image</div>
+					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+						Upload Image
+					</div>
 					<FileUploader
 						bind:files
 						accept="image/jpeg,image/png,image/webp"
@@ -179,7 +205,9 @@
 					/>
 				</div>
 				<div>
-					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Analysis Prompt</div>
+					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+						Analysis Prompt
+					</div>
 					<PromptInput
 						bind:value={prompt}
 						placeholder="What would you like to analyze about this image?"
@@ -189,7 +217,9 @@
 
 			{#if benchmarkType === 'document'}
 				<div>
-					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Upload Document</div>
+					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+						Upload Document
+					</div>
 					<FileUploader
 						bind:files
 						accept=".pdf"
@@ -198,9 +228,7 @@
 					/>
 				</div>
 				<div>
-					<div class="mb-2 text-sm font-medium text-slate-700"
-						>Processing Instructions</div
-					>
+					<div class="mb-2 text-sm font-medium text-slate-700">Processing Instructions</div>
 					<PromptInput
 						bind:value={prompt}
 						placeholder="What would you like to extract or analyze from this document?"

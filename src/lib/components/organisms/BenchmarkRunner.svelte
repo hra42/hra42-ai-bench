@@ -74,21 +74,21 @@
 						try {
 							const data = JSON.parse(line.slice(6));
 							handleStreamEvent(currentEvent, data);
-						} catch (e) {
+						} catch {
 							// Failed to parse SSE data
 						}
 						currentEvent = null;
 					}
 				}
 			}
-		} catch (error) {
+		} catch {
 			alert('Failed to run benchmark');
 		} finally {
 			isRunning.set(false);
 		}
 	}
 
-	function handleStreamEvent(event: string, data: any) {
+	function handleStreamEvent(event: string, data: unknown) {
 		switch (event) {
 			case 'run_started':
 				currentRun.set({
@@ -217,6 +217,23 @@
 							? {
 									...r,
 									openRouterLatencyMs: data.openRouterLatencyMs
+								}
+							: r
+					)
+				);
+				break;
+
+			case 'metrics_update':
+				// Update all metrics when they arrive from OpenRouter generation endpoint
+				modelResponses.update((responses) =>
+					responses.map((r) =>
+						r.id === data.responseId
+							? {
+									...r,
+									openRouterLatencyMs: data.openRouterLatencyMs,
+									generationTimeMs: data.generationTimeMs,
+									moderationLatencyMs: data.moderationLatencyMs,
+									timeToFirstTokenMs: data.timeToFirstTokenMs
 								}
 							: r
 					)
