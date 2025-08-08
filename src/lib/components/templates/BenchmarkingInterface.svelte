@@ -122,8 +122,8 @@
 			{#if responses.length > 0}
 				<div class="space-y-6">
 					<div>
-						<h2 class="mb-4 text-xl font-semibold text-slate-900">Results</h2>
-						<ModelComparisonGrid {responses} />
+						<h2 class="mb-4 text-xl font-semibold text-slate-900 dark:text-white">Results</h2>
+						<ModelComparisonGrid {responses} {benchmarkType} {jsonSchema} />
 					</div>
 
 					{#if costBreakdown.length > 0}

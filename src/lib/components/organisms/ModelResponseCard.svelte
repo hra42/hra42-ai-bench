@@ -6,6 +6,7 @@
 	import TokenCounter from '../molecules/TokenCounter.svelte';
 	import StatusIndicator from '../molecules/StatusIndicator.svelte';
 	import ResponseViewer from './ResponseViewer.svelte';
+	import JsonResponseViewer from '../molecules/JsonResponseViewer.svelte';
 
 	export let modelName: string;
 	export let provider: string;
@@ -18,6 +19,8 @@
 	export let outputTokens: number | undefined = undefined;
 	export let maxTokens: number | undefined = undefined;
 	export let responseFormat: 'text' | 'json' | 'markdown' | 'code' = 'text';
+	export let benchmarkType: 'text' | 'structured' | 'tool' | 'vision' | 'document' = 'text';
+	export let jsonSchema: string | null = null;
 	export let expanded = false;
 
 	function toggleExpanded() {
@@ -64,6 +67,8 @@
 						/>
 					{/if}
 				</div>
+			{:else if benchmarkType === 'structured'}
+				<JsonResponseViewer {response} schema={jsonSchema} {modelName} />
 			{:else}
 				<ResponseViewer content={response} format={responseFormat} maxHeight="600px" />
 			{/if}

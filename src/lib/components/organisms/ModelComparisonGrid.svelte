@@ -3,6 +3,7 @@
 	import CostDisplay from '../molecules/CostDisplay.svelte';
 	import TokenCounter from '../molecules/TokenCounter.svelte';
 	import StatusIndicator from '../molecules/StatusIndicator.svelte';
+	import JsonResponseViewer from '../molecules/JsonResponseViewer.svelte';
 
 	export let responses: Array<{
 		modelId: string;
@@ -23,6 +24,8 @@
 		tokensPerSecond?: number;
 	}> = [];
 
+	export let benchmarkType: 'text' | 'structured' | 'tool' | 'vision' | 'document' = 'text';
+	export let jsonSchema: string | null = null;
 	export let columns: 'auto' | 1 | 2 | 3 | 4 = 'auto';
 
 	$: gridClass = columns === 'auto' ? 'grid-cols-1 lg:grid-cols-2' : `grid-cols-${columns}`;
@@ -52,14 +55,18 @@
 				</div>
 
 				{#if (response.status === 'completed' || response.status === 'running') && response.response}
-					<div class="prose prose-sm max-w-none">
-						<div class="max-h-96 overflow-y-auto rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
-							<pre
-								class="font-mono text-xs whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.response}{#if response.status === 'running'}<span
-										class="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-slate-600 dark:bg-slate-400"
-									/>{/if}</pre>
+					{#if benchmarkType === 'structured' && response.status === 'completed'}
+						<JsonResponseViewer response={response.response} schema={jsonSchema} modelName="" />
+					{:else}
+						<div class="prose prose-sm max-w-none">
+							<div class="max-h-96 overflow-y-auto rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
+								<pre
+									class="font-mono text-xs whitespace-pre-wrap text-slate-700 dark:text-slate-300">{response.response}{#if response.status === 'running'}<span
+											class="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-slate-600 dark:bg-slate-400"
+										/>{/if}</pre>
+							</div>
 						</div>
-					</div>
+					{/if}
 
 					<div class="space-y-2 border-t border-slate-200 pt-2 dark:border-slate-700">
 						<!-- Metrics Row -->
@@ -152,9 +159,13 @@
 							<p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Generating response...</p>
 						</div>
 					</div>
-				{:else}
+				{:else if response.status === 'pending'}
 					<div class="flex items-center justify-center py-8">
 						<p class="text-sm text-slate-400 dark:text-slate-500">Waiting to start...</p>
+					</div>
+				{:else if response.status === 'completed'}
+					<div class="flex items-center justify-center py-8">
+						<p class="text-sm text-slate-500 dark:text-slate-400">No response received</p>
 					</div>
 				{/if}
 			</div>
