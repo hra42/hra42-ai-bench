@@ -55,6 +55,282 @@
 	const exampleUserPrompt =
 		'Extract the person information from this text: John Doe is a 28-year-old software engineer. His email is john.doe@example.com. He is skilled in Python, JavaScript, and Docker.';
 
+	// Function calling examples
+	const functionExamples = {
+		weather: {
+			name: 'Weather & Location',
+			systemPrompt:
+				'You are a helpful weather assistant. Use the available tools to provide accurate weather information.',
+			userPrompt:
+				"What's the weather like in Tokyo and New York? Also, how far apart are these cities?",
+			tools: [
+				{
+					type: 'function',
+					function: {
+						name: 'get_weather',
+						description: 'Get current weather conditions for a specific location',
+						parameters: {
+							type: 'object',
+							properties: {
+								location: {
+									type: 'string',
+									description: 'City name or coordinates'
+								},
+								units: {
+									type: 'string',
+									enum: ['celsius', 'fahrenheit'],
+									description: 'Temperature unit preference',
+									default: 'celsius'
+								}
+							},
+							required: ['location']
+						}
+					}
+				},
+				{
+					type: 'function',
+					function: {
+						name: 'calculate_distance',
+						description: 'Calculate distance between two locations',
+						parameters: {
+							type: 'object',
+							properties: {
+								location1: {
+									type: 'string',
+									description: 'First location (city name or coordinates)'
+								},
+								location2: {
+									type: 'string',
+									description: 'Second location (city name or coordinates)'
+								},
+								unit: {
+									type: 'string',
+									enum: ['km', 'miles'],
+									default: 'km'
+								}
+							},
+							required: ['location1', 'location2']
+						}
+					}
+				}
+			]
+		},
+		database: {
+			name: 'Database Operations',
+			systemPrompt:
+				'You are a database assistant. Use the provided tools to help users query and manage their data.',
+			userPrompt:
+				'Find all users who signed up last month and calculate the average age of premium subscribers.',
+			tools: [
+				{
+					type: 'function',
+					function: {
+						name: 'query_database',
+						description: 'Execute a database query to retrieve data',
+						parameters: {
+							type: 'object',
+							properties: {
+								table: {
+									type: 'string',
+									description: 'Database table name'
+								},
+								filters: {
+									type: 'object',
+									description: 'Query filters as key-value pairs'
+								},
+								fields: {
+									type: 'array',
+									items: { type: 'string' },
+									description: 'Fields to retrieve'
+								},
+								limit: {
+									type: 'integer',
+									description: 'Maximum number of results',
+									default: 100
+								}
+							},
+							required: ['table']
+						}
+					}
+				},
+				{
+					type: 'function',
+					function: {
+						name: 'calculate_statistics',
+						description: 'Calculate statistical metrics on a dataset',
+						parameters: {
+							type: 'object',
+							properties: {
+								data: {
+									type: 'array',
+									description: 'Array of data points'
+								},
+								metric: {
+									type: 'string',
+									enum: ['mean', 'median', 'sum', 'count', 'std_dev'],
+									description: 'Statistical metric to calculate'
+								}
+							},
+							required: ['data', 'metric']
+						}
+					}
+				}
+			]
+		},
+		math: {
+			name: 'Math & Calculations',
+			systemPrompt:
+				'You are a mathematical assistant. Use the calculation tools to solve problems accurately.',
+			userPrompt:
+				'Calculate the compound interest on $10,000 invested at 5% annual rate for 10 years, then convert the final amount to euros.',
+			tools: [
+				{
+					type: 'function',
+					function: {
+						name: 'calculate_compound_interest',
+						description: 'Calculate compound interest on an investment',
+						parameters: {
+							type: 'object',
+							properties: {
+								principal: {
+									type: 'number',
+									description: 'Initial investment amount'
+								},
+								rate: {
+									type: 'number',
+									description: 'Annual interest rate (as decimal, e.g., 0.05 for 5%)'
+								},
+								time: {
+									type: 'number',
+									description: 'Investment period in years'
+								},
+								compounds_per_year: {
+									type: 'integer',
+									description: 'Number of times interest compounds per year',
+									default: 1
+								}
+							},
+							required: ['principal', 'rate', 'time']
+						}
+					}
+				},
+				{
+					type: 'function',
+					function: {
+						name: 'convert_currency',
+						description: 'Convert between different currencies',
+						parameters: {
+							type: 'object',
+							properties: {
+								amount: {
+									type: 'number',
+									description: 'Amount to convert'
+								},
+								from_currency: {
+									type: 'string',
+									description: 'Source currency code (e.g., USD)'
+								},
+								to_currency: {
+									type: 'string',
+									description: 'Target currency code (e.g., EUR)'
+								}
+							},
+							required: ['amount', 'from_currency', 'to_currency']
+						}
+					}
+				}
+			]
+		},
+		ecommerce: {
+			name: 'E-commerce & Shopping',
+			systemPrompt:
+				'You are a shopping assistant. Help users find products and manage their orders.',
+			userPrompt:
+				'Find wireless headphones under $200, check if the top result is in stock, and add it to my cart.',
+			tools: [
+				{
+					type: 'function',
+					function: {
+						name: 'search_products',
+						description: 'Search for products in the catalog',
+						parameters: {
+							type: 'object',
+							properties: {
+								query: {
+									type: 'string',
+									description: 'Search query'
+								},
+								category: {
+									type: 'string',
+									description: 'Product category filter'
+								},
+								max_price: {
+									type: 'number',
+									description: 'Maximum price filter'
+								},
+								min_price: {
+									type: 'number',
+									description: 'Minimum price filter'
+								},
+								sort_by: {
+									type: 'string',
+									enum: ['price_asc', 'price_desc', 'rating', 'relevance'],
+									default: 'relevance'
+								}
+							},
+							required: ['query']
+						}
+					}
+				},
+				{
+					type: 'function',
+					function: {
+						name: 'check_inventory',
+						description: 'Check product availability in inventory',
+						parameters: {
+							type: 'object',
+							properties: {
+								product_id: {
+									type: 'string',
+									description: 'Product identifier'
+								},
+								location: {
+									type: 'string',
+									description: 'Store location or warehouse'
+								}
+							},
+							required: ['product_id']
+						}
+					}
+				},
+				{
+					type: 'function',
+					function: {
+						name: 'add_to_cart',
+						description: 'Add a product to the shopping cart',
+						parameters: {
+							type: 'object',
+							properties: {
+								product_id: {
+									type: 'string',
+									description: 'Product identifier'
+								},
+								quantity: {
+									type: 'integer',
+									description: 'Number of items to add',
+									default: 1
+								}
+							},
+							required: ['product_id']
+						}
+					}
+				}
+			]
+		}
+	};
+
+	let selectedFunctionExample = 'weather';
+
 	// Additional example schemas
 	const exampleSchemas = {
 		person: {
@@ -140,7 +416,11 @@
 	// Validate JSON schema when it changes
 	$: validateJsonSchema(jsonSchema);
 
+	// Validate function definitions when they change
+	$: validateFunctionDefinitions(functionDefinitions);
+
 	let jsonSchemaError = '';
+	let functionDefinitionsError = '';
 
 	function validateJsonSchema(schema: string) {
 		if (!schema || schema.trim() === '') {
@@ -159,6 +439,53 @@
 			}
 		} catch (e) {
 			jsonSchemaError = 'Invalid JSON syntax';
+		}
+	}
+
+	function validateFunctionDefinitions(defs: string) {
+		if (!defs || defs.trim() === '') {
+			functionDefinitionsError = '';
+			return;
+		}
+
+		try {
+			const parsed = JSON.parse(defs);
+			if (!Array.isArray(parsed)) {
+				functionDefinitionsError = 'Tools must be an array';
+				return;
+			}
+
+			for (let i = 0; i < parsed.length; i++) {
+				const tool = parsed[i];
+				if (!tool.type || tool.type !== 'function') {
+					functionDefinitionsError = `Tool ${i + 1}: type must be "function"`;
+					return;
+				}
+				if (!tool.function) {
+					functionDefinitionsError = `Tool ${i + 1}: missing function definition`;
+					return;
+				}
+				if (!tool.function.name) {
+					functionDefinitionsError = `Tool ${i + 1}: function must have a name`;
+					return;
+				}
+				if (tool.function.parameters && typeof tool.function.parameters !== 'object') {
+					functionDefinitionsError = `Tool ${i + 1}: parameters must be an object`;
+					return;
+				}
+			}
+			functionDefinitionsError = '';
+		} catch (e) {
+			functionDefinitionsError = 'Invalid JSON syntax';
+		}
+	}
+
+	function loadFunctionExample() {
+		const example = functionExamples[selectedFunctionExample as keyof typeof functionExamples];
+		if (example) {
+			systemPrompt = example.systemPrompt;
+			prompt = example.userPrompt;
+			functionDefinitions = JSON.stringify(example.tools, null, 2);
 		}
 	}
 
@@ -385,26 +712,104 @@
 			{/if}
 
 			{#if benchmarkType === 'tool'}
+				<div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+					<div class="flex items-start justify-between gap-4">
+						<div class="flex-1">
+							<p class="text-sm font-medium text-blue-900 dark:text-blue-100">
+								Load a function calling example
+							</p>
+							<p class="mt-1 text-xs text-blue-800 dark:text-blue-200">
+								Choose an example scenario to test how models handle function/tool calling
+							</p>
+						</div>
+						<div class="flex items-center gap-2">
+							<select
+								bind:value={selectedFunctionExample}
+								class="rounded-md border border-blue-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-blue-700 dark:bg-slate-800 dark:text-slate-200"
+							>
+								{#each Object.entries(functionExamples) as [key, example]}
+									<option value={key}>{example.name}</option>
+								{/each}
+							</select>
+							<button
+								type="button"
+								on:click={loadFunctionExample}
+								class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+							>
+								Load Example
+							</button>
+						</div>
+					</div>
+				</div>
+
 				<div>
 					<div class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">User Prompt</div>
 					<PromptInput
 						bind:value={prompt}
-						placeholder="Enter your prompt for function calling..."
+						placeholder="Enter your prompt that will require the model to use the available tools..."
 					/>
 				</div>
 				<div>
-					<label
-						for="function-defs"
-						class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-						>Function Definitions</label
-					>
+					<div class="mb-2 flex items-center justify-between">
+						<label
+							for="function-defs"
+							class="text-sm font-medium text-slate-700 dark:text-slate-300"
+						>
+							Tool Definitions (OpenAI Format)
+						</label>
+						{#if functionDefinitions}
+							<span class="text-xs text-slate-500 dark:text-slate-400">
+								{(() => {
+									try {
+										const tools = JSON.parse(functionDefinitions);
+										return `${tools.length} tool${tools.length !== 1 ? 's' : ''} defined`;
+									} catch {
+										return '';
+									}
+								})()}
+							</span>
+						{/if}
+					</div>
 					<textarea
 						id="function-defs"
 						bind:value={functionDefinitions}
-						class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-						rows="8"
-						placeholder={'[{"name": "function_name", "parameters": {...}}]'}
+						class="w-full rounded-lg border font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none
+							{functionDefinitionsError
+							? 'border-red-500 bg-red-50 text-red-900 dark:border-red-400 dark:bg-red-900/20 dark:text-red-100'
+							: 'border-slate-300 bg-white text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white'} px-3 py-2"
+						rows="12"
+						placeholder={'[\n  {\n    "type": "function",\n    "function": {\n      "name": "tool_name",\n      "description": "What this tool does",\n      "parameters": {\n        "type": "object",\n        "properties": {...},\n        "required": [...]\n      }\n    }\n  }\n]'}
 					></textarea>
+					{#if functionDefinitionsError}
+						<p class="mt-1 text-xs text-red-600 dark:text-red-400">{functionDefinitionsError}</p>
+					{:else if functionDefinitions}
+						<p class="mt-1 text-xs text-green-600 dark:text-green-400">✓ Valid tool definitions</p>
+					{/if}
+					<div
+						class="mt-2 space-y-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
+					>
+						<div>
+							<strong>Note:</strong> Function calling allows models to request external tool usage. The
+							model won't execute tools directly but will return structured requests indicating which
+							tools to call with what parameters.
+						</div>
+						<div>
+							<strong>Compatible Models:</strong> Most modern models support function calling
+							including GPT-4, GPT-3.5, Claude 3+, Gemini, and many open-source models. Check
+							<a
+								href="https://openrouter.ai/models?supported_parameters=tools"
+								target="_blank"
+								class="underline"
+							>
+								supported models
+							</a> for the full list.
+						</div>
+						<div>
+							<strong>Response Format:</strong> Models will return tool_calls with function names and
+							arguments that match your defined tools. The actual tool execution would happen on your
+							side in a real application.
+						</div>
+					</div>
 				</div>
 			{/if}
 
