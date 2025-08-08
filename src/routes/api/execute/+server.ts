@@ -23,8 +23,8 @@ export const POST: RequestHandler = async ({ request }) => {
       INSERT INTO benchmark_runs (
         id, name, description, benchmark_type, status,
         total_models, completed_models, system_prompt, user_prompt,
-        max_tokens, temperature, started_at
-      ) VALUES (?, ?, ?, ?, 'running', ?, 0, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        max_tokens, temperature, json_schema, started_at
+      ) VALUES (?, ?, ?, ?, 'running', ?, 0, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `,
 			[
 				runId,
@@ -35,7 +35,12 @@ export const POST: RequestHandler = async ({ request }) => {
 				config.systemPrompt || null,
 				config.userPrompt,
 				config.maxTokens || 1000,
-				config.temperature || 0.7
+				config.temperature || 0.7,
+				config.type === 'structured' && config.jsonSchema
+					? typeof config.jsonSchema === 'string'
+						? config.jsonSchema
+						: JSON.stringify(config.jsonSchema)
+					: null
 			]
 		);
 
@@ -103,8 +108,8 @@ async function processModels(
 			}
 			messages.push({ role: 'user', content: config.userPrompt });
 
-			// Make API call with usage accounting
-			const response = await client.chat({
+			// Prepare request with structured output support
+			const chatRequest: any = {
 				model: modelId,
 				messages,
 				max_tokens: config.maxTokens || 1000,
@@ -113,13 +118,64 @@ async function processModels(
 				usage: {
 					include: true // Request usage information from OpenRouter
 				}
-			});
+			};
+
+			// Add structured output formatting if applicable
+			if (config.type === 'structured' && config.jsonSchema) {
+				try {
+					const schema =
+						typeof config.jsonSchema === 'string'
+							? JSON.parse(config.jsonSchema)
+							: config.jsonSchema;
+
+					chatRequest.response_format = {
+						type: 'json_schema',
+						json_schema: {
+							name: 'structured_output',
+							strict: true,
+							schema: schema
+						}
+					};
+				} catch (e) {
+					console.error('Invalid JSON schema:', e);
+				}
+			}
+
+			// Make API call with usage accounting
+			const response = await client.chat(chatRequest);
 
 			const latencyMs = Date.now() - startTime;
 
 			// OpenRouter returns the cost directly in the response
 			const cost = response.usage?.cost || 0;
 			totalCost += cost;
+
+			// Extract response content
+			const messageContent = response.choices?.[0]?.message?.content;
+			let responseContent =
+				typeof messageContent === 'string' ? messageContent : JSON.stringify(messageContent) || '';
+
+			// Check if response is empty
+			if (!responseContent || responseContent.trim() === '') {
+				console.warn(`Model ${modelId} returned empty response`);
+				// Store a message about empty response for structured outputs
+				if (config.type === 'structured') {
+					responseContent =
+						'{"error": "Model returned empty response - may not support structured outputs"}';
+				}
+			}
+
+			// For structured outputs, also store the JSON separately if it's valid
+			let responseJson = null;
+			if (config.type === 'structured' && responseContent) {
+				try {
+					// Validate that the response is valid JSON
+					const parsed = JSON.parse(responseContent);
+					responseJson = JSON.stringify(parsed);
+				} catch (e) {
+					console.error('Response is not valid JSON:', e);
+				}
+			}
 
 			// Update response in database
 			await db.run(
@@ -128,6 +184,7 @@ async function processModels(
         SET 
           status = 'completed',
           response_text = ?,
+          response_json = ?,
           prompt_tokens = ?,
           completion_tokens = ?,
           total_tokens = ?,
@@ -138,7 +195,8 @@ async function processModels(
         WHERE id = ?
       `,
 				[
-					response.choices?.[0]?.message?.content || '',
+					responseContent,
+					responseJson,
 					response.usage?.prompt_tokens || 0,
 					response.usage?.completion_tokens || 0,
 					response.usage?.total_tokens || 0,
