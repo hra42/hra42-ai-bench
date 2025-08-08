@@ -23,8 +23,8 @@ export const POST: RequestHandler = async ({ request }) => {
       INSERT INTO benchmark_runs (
         id, name, description, benchmark_type, status,
         total_models, completed_models, system_prompt, user_prompt,
-        max_tokens, temperature, json_schema, started_at
-      ) VALUES (?, ?, ?, ?, 'running', ?, 0, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        max_tokens, temperature, json_schema, tool_definitions, started_at
+      ) VALUES (?, ?, ?, ?, 'running', ?, 0, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `,
 			[
 				runId,
@@ -40,6 +40,11 @@ export const POST: RequestHandler = async ({ request }) => {
 					? typeof config.jsonSchema === 'string'
 						? config.jsonSchema
 						: JSON.stringify(config.jsonSchema)
+					: null,
+				config.type === 'tool' && config.toolDefinitions
+					? typeof config.toolDefinitions === 'string'
+						? config.toolDefinitions
+						: JSON.stringify(config.toolDefinitions)
 					: null
 			]
 		);
@@ -185,6 +190,7 @@ async function processModels(
           status = 'completed',
           response_text = ?,
           response_json = ?,
+          tool_calls = ?,
           prompt_tokens = ?,
           completion_tokens = ?,
           total_tokens = ?,
@@ -197,6 +203,7 @@ async function processModels(
 				[
 					responseContent,
 					responseJson,
+					toolCallsJson,
 					response.usage?.prompt_tokens || 0,
 					response.usage?.completion_tokens || 0,
 					response.usage?.total_tokens || 0,

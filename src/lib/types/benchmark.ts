@@ -42,6 +42,8 @@ export interface ModelResponse {
 	modelName?: string;
 	status: 'pending' | 'running' | 'completed' | 'failed' | 'error';
 	responseText?: string;
+	responseJson?: string;
+	toolCalls?: string;
 	errorMessage?: string;
 	promptTokens?: number;
 	completionTokens?: number;

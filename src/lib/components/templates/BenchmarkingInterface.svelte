@@ -23,11 +23,18 @@
 		provider: string;
 		status: 'pending' | 'running' | 'completed' | 'failed';
 		response?: string;
+		responseJson?: string;
+		toolCalls?: string;
 		error?: string;
 		duration?: number;
 		cost?: number;
 		inputTokens?: number;
 		outputTokens?: number;
+		timeToFirstTokenMs?: number;
+		openRouterLatencyMs?: number;
+		generationTimeMs?: number;
+		moderationLatencyMs?: number;
+		tokensPerSecond?: number;
 	}> = [];
 	export let costBreakdown: Array<{
 		name: string;

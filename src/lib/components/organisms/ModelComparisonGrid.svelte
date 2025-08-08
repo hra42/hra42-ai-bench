@@ -11,6 +11,8 @@
 		provider: string;
 		status: 'pending' | 'running' | 'completed' | 'failed';
 		response?: string;
+		responseJson?: string;
+		toolCalls?: string;
 		error?: string;
 		duration?: number;
 		openRouterLatencyMs?: number;
