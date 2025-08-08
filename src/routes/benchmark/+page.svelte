@@ -212,6 +212,21 @@
 		});
 
 		try {
+			// Process images for vision benchmarks
+			let imageData: string | undefined;
+			if (config.benchmarkType === 'vision' && config.files && config.files.length > 0) {
+				const file = config.files[0]; // Use the first image
+				if (file.type.startsWith('image/')) {
+					// Convert image to base64 data URL
+					const reader = new FileReader();
+					imageData = await new Promise((resolve, reject) => {
+						reader.onloadend = () => resolve(reader.result as string);
+						reader.onerror = reject;
+						reader.readAsDataURL(file);
+					});
+				}
+			}
+
 			// Use streaming endpoint for real-time updates
 			const response = await fetch('/api/execute/stream', {
 				method: 'POST',
@@ -226,9 +241,12 @@
 						userPrompt: config.prompt,
 						maxTokens: config.maxTokens,
 						temperature: config.temperature,
-						jsonSchema: config.benchmarkType === 'structured' ? config.jsonSchema : undefined
+						jsonSchema: config.benchmarkType === 'structured' ? config.jsonSchema : undefined,
+						toolDefinitions:
+							config.benchmarkType === 'tool' ? config.functionDefinitions : undefined
 					},
-					modelIds: config.selectedModels
+					modelIds: config.selectedModels,
+					imageData // Include image data for vision benchmarks
 				})
 			});
 
