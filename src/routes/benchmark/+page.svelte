@@ -54,7 +54,7 @@
 	}> = [];
 	let isRunning = false;
 
-	function handleStreamEvent(eventType: string, data: Record<string, unknown>) {
+	function handleStreamEvent(eventType: string, data: any) {
 		switch (eventType) {
 			case 'run_started':
 				break;
@@ -286,7 +286,7 @@
 		isRunning = false;
 		responses = responses.map((r) => ({
 			...r,
-			status: r.status === 'running' ? 'cancelled' : r.status
+			status: r.status === 'running' ? 'failed' : r.status
 		}));
 	}
 </script>
