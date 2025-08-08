@@ -1,28 +1,30 @@
 import type { PageServerLoad } from './$types';
 import { SimplifiedDBClient } from '$lib/server/db/client';
+import { getOpenRouterClient } from '$lib/server/openrouter/client';
 
 export const load: PageServerLoad = async () => {
-	const db = new SimplifiedDBClient();
-
 	try {
-		// Get available models from database
-		const modelsQuery = `
-			SELECT 
-				id,
-				name,
-				description,
-				pricing_prompt,
-				pricing_completion,
-				supports_tools,
-				supports_vision,
-				supports_json_output
-			FROM models
-			ORDER BY name
-		`;
-		const models = await db.all(modelsQuery);
+		// Always fetch fresh models from OpenRouter for now
+		const client = getOpenRouterClient();
+		const openRouterModels = await client.getModels();
+		
+		// Filter and transform models
+		const models = openRouterModels
+			.filter(model => model.pricing && model.id && model.name)
+			.map(model => ({
+				id: model.id,
+				name: model.name,
+				description: model.description || '',
+				pricing_prompt: model.pricing?.prompt || 0,
+				pricing_completion: model.pricing?.completion || 0,
+				supports_tools: false,
+				supports_vision: model.architecture?.modality === 'multimodal' || false,
+				supports_json_output: false
+			}));
 
-		// Get benchmark templates
-		const templatesQuery = `
+		// Get benchmark templates (keeping this as-is for now)
+		const db = new SimplifiedDBClient();
+		const templates = await db.all(`
 			SELECT 
 				id,
 				name,
@@ -35,21 +37,20 @@ export const load: PageServerLoad = async () => {
 			FROM benchmark_templates
 			ORDER BY created_at DESC
 			LIMIT 10
-		`;
-		const templates = await db.all(templatesQuery);
+		`);
 
-		return {
+		const result = {
 			models: models.map(m => ({
-				id: m.id,
-				name: m.name,
-				description: m.description || '',
-				pricingPrompt: parseFloat(m.pricing_prompt || '0'),
-				pricingCompletion: parseFloat(m.pricing_completion || '0'),
-				supportsTools: m.supports_tools === 1,
-				supportsVision: m.supports_vision === 1,
-				supportsJsonOutput: m.supports_json_output === 1
+				id: String(m.id),
+				name: String(m.name),
+				description: String(m.description || ''),
+				pricingPrompt: Number(m.pricing_prompt || 0),
+				pricingCompletion: Number(m.pricing_completion || 0),
+				supportsTools: Boolean(m.supports_tools),
+				supportsVision: Boolean(m.supports_vision),
+				supportsJsonOutput: Boolean(m.supports_json_output)
 			})),
-			templates: templates.map(t => ({
+			templates: templates.map((t: any) => ({
 				id: t.id,
 				name: t.name,
 				description: t.description || '',
@@ -60,6 +61,8 @@ export const load: PageServerLoad = async () => {
 				toolDefinitions: t.tool_definitions || ''
 			}))
 		};
+		
+		return result;
 	} catch (error) {
 		console.error('Error loading benchmark data:', error);
 		// Return empty data on error

@@ -28,20 +28,23 @@ export const GET: RequestHandler = async () => {
     `);
 
 		if (cachedModels.length > 0) {
-			const models: Model[] = cachedModels.map((m: any) => ({
-				id: String(m.id || ''),
-				name: String(m.name || ''),
-				description: String(m.description || ''),
-				contextLength: Number(m.contextLength || 0),
-				pricing: {
-					prompt: Number(m.pricingPrompt || 0),
-					completion: Number(m.pricingCompletion || 0)
-				},
-				topProvider: m.topProvider || null,
-				supportsTools: Boolean(m.supportsTools),
-				supportsVision: Boolean(m.supportsVision),
-				supportsJsonOutput: Boolean(m.supportsJsonOutput)
-			}));
+			const models: Model[] = cachedModels.map((m: unknown) => {
+				const model = m as Record<string, unknown>;
+				return {
+					id: String(model.id || ''),
+					name: String(model.name || ''),
+					description: String(model.description || ''),
+					contextLength: Number(model.contextLength || 0),
+					pricing: {
+						prompt: Number(model.pricingPrompt || 0),
+						completion: Number(model.pricingCompletion || 0)
+					},
+					topProvider: model.topProvider || null,
+					supportsTools: Boolean(model.supportsTools),
+					supportsVision: Boolean(model.supportsVision),
+					supportsJsonOutput: Boolean(model.supportsJsonOutput)
+				};
+			});
 
 			return json(models);
 		}
@@ -94,7 +97,7 @@ export const GET: RequestHandler = async () => {
 						supportsVision: model.architecture?.modality === 'multimodal' || false,
 						supportsJsonOutput: false
 					});
-				} catch (err) {
+				} catch {
 					// Skip failed insert
 				}
 			}
@@ -120,7 +123,7 @@ export const GET: RequestHandler = async () => {
 		}));
 
 		return json(cleanModels);
-	} catch (error) {
+	} catch {
 		return json({ error: 'Failed to fetch models' }, { status: 500 });
 	}
 };

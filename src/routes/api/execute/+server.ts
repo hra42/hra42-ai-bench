@@ -74,8 +74,8 @@ async function processModels(
 	config: BenchmarkConfig,
 	modelIds: string[],
 	responseIds: Record<string, string>,
-	client: any,
-	db: any
+	client: ReturnType<typeof getOpenRouterClient>,
+	db: SimplifiedDBClient
 ) {
 	let completedCount = 0;
 	let totalCost = 0;
@@ -97,7 +97,7 @@ async function processModels(
 			const startTime = Date.now();
 
 			// Prepare messages
-			const messages: any[] = [];
+			const messages: Array<{ role: string; content: string }> = [];
 			if (config.systemPrompt) {
 				messages.push({ role: 'system', content: config.systemPrompt });
 			}
@@ -111,7 +111,7 @@ async function processModels(
 				temperature: config.temperature || 0.7,
 				stream: false,
 				usage: {
-					include: true  // Request usage information from OpenRouter
+					include: true // Request usage information from OpenRouter
 				}
 			});
 

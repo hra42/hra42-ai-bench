@@ -19,13 +19,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			// Helper to send SSE messages
 			let streamClosed = false;
-			const sendMessage = (event: string, data: any) => {
+			const sendMessage = (event: string, data: unknown) => {
 				if (!streamClosed) {
 					try {
 						controller.enqueue(
 							encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
 						);
-					} catch (err) {
+					} catch {
 						// Stream is closed, ignore
 						streamClosed = true;
 					}
@@ -81,7 +81,7 @@ export const POST: RequestHandler = async ({ request }) => {
 						const startTime = Date.now();
 
 						// Prepare messages
-						const messages: any[] = [];
+						const messages: Array<{ role: string; content: string }> = [];
 						if (config.systemPrompt) {
 							messages.push({ role: 'system', content: config.systemPrompt });
 						}
@@ -144,9 +144,10 @@ export const POST: RequestHandler = async ({ request }) => {
 											const currentTime = Date.now() - startTime;
 											// Calculate actual cost from usage data
 											// Handle scientific notation and ensure it's a valid number
-											const actualCost = typeof parsed.usage.cost === 'number' && !isNaN(parsed.usage.cost) 
-												? parsed.usage.cost 
-												: 0;
+											const actualCost =
+												typeof parsed.usage.cost === 'number' && !isNaN(parsed.usage.cost)
+													? parsed.usage.cost
+													: 0;
 											totalCost += actualCost;
 
 											// Update database with usage and cost
@@ -193,7 +194,7 @@ export const POST: RequestHandler = async ({ request }) => {
 												}
 											});
 										}
-									} catch (e) {
+									} catch {
 										// Ignore parsing errors
 									}
 								}
@@ -246,29 +247,36 @@ export const POST: RequestHandler = async ({ request }) => {
 									const generation = await client.getGeneration(generationId);
 
 									if (generation && generation.latency !== undefined) {
-										// Update with OpenRouter's reported latency
+										// Update with OpenRouter's reported metrics
 										const openRouterLatencyMs = generation.latency;
+										const generationTimeMs = generation.generation_time || null;
+										const moderationLatencyMs = generation.moderation_latency || null;
 
 										await db.run(
 											`
                       UPDATE model_responses 
                       SET 
-                        openrouter_latency_ms = ?
+                        openrouter_latency_ms = ?,
+                        generation_time_ms = ?,
+                        moderation_latency_ms = ?
                       WHERE id = ?
                     `,
-											[openRouterLatencyMs, responseId]
+											[openRouterLatencyMs, generationTimeMs, moderationLatencyMs, responseId]
 										);
 
-										// Send latency update
-										sendMessage('latency_update', {
+										// Send metrics update
+										sendMessage('metrics_update', {
 											modelId,
 											responseId,
-											openRouterLatencyMs
+											openRouterLatencyMs,
+											generationTimeMs,
+											moderationLatencyMs,
+											timeToFirstTokenMs: firstTokenTime ? firstTokenTime - startTime : null
 										});
 
 										break; // Exit the loop
 									}
-								} catch (err) {
+								} catch {
 									// Retry silently
 								}
 								retries++;

@@ -11,18 +11,16 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="min-h-screen bg-white dark:bg-slate-900 transition-colors">
-	<nav class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex items-center justify-between h-16">
+<div class="min-h-screen bg-white transition-colors dark:bg-slate-900">
+	<nav class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="flex h-16 items-center justify-between">
 				<div class="flex items-center gap-8">
-					<a href="/" class="text-xl font-bold text-slate-900 dark:text-white">
-						HRA42 Bench
-					</a>
-					
-					<div class="hidden md:flex items-center gap-6">
-						<a 
-							href="/" 
+					<a href="/" class="text-xl font-bold text-slate-900 dark:text-white"> HRA42 Bench </a>
+
+					<div class="hidden items-center gap-6 md:flex">
+						<a
+							href="/"
 							class="text-sm font-medium transition-colors"
 							class:text-blue-600={$page.url.pathname === '/'}
 							class:dark:text-blue-400={$page.url.pathname === '/'}
@@ -33,8 +31,8 @@
 						>
 							Dashboard
 						</a>
-						<a 
-							href="/benchmark" 
+						<a
+							href="/benchmark"
 							class="text-sm font-medium transition-colors"
 							class:text-blue-600={$page.url.pathname === '/benchmark'}
 							class:dark:text-blue-400={$page.url.pathname === '/benchmark'}
@@ -47,14 +45,14 @@
 						</a>
 					</div>
 				</div>
-				
+
 				<div class="flex items-center gap-4">
 					<ThemeToggle />
 				</div>
 			</div>
 		</div>
 	</nav>
-	
+
 	<main class="flex-1">
 		{@render children?.()}
 	</main>

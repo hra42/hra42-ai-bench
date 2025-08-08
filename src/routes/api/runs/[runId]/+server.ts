@@ -15,7 +15,7 @@ export const GET: RequestHandler = async ({ params }) => {
     `,
 			[runId]
 		);
-		
+
 		const run = runs[0];
 
 		if (!run) {
@@ -36,6 +36,8 @@ export const GET: RequestHandler = async ({ params }) => {
         cost,
         latency_ms,
         openrouter_latency_ms,
+        generation_time_ms,
+        moderation_latency_ms,
         time_to_first_token_ms,
         tokens_per_second,
         error_message
