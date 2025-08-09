@@ -53,9 +53,6 @@
 		return matchesSearch && matchesType && matchesStatus;
 	});
 
-	function handleExport() {
-		dispatch('export', { benchmarks: filteredBenchmarks });
-	}
 
 	function handleNewBenchmark() {
 		dispatch('navigate', { to: '/benchmark' });
@@ -73,16 +70,7 @@
 					</p>
 				</div>
 
-				<div class="flex items-center gap-3">
-					<Button
-						variant="secondary"
-						on:click={handleExport}
-						disabled={filteredBenchmarks.length === 0}
-					>
-						Export Results
-					</Button>
-					<Button variant="primary" on:click={handleNewBenchmark}>New Benchmark</Button>
-				</div>
+				<Button variant="primary" on:click={handleNewBenchmark}>New Benchmark</Button>
 			</div>
 
 			<Card>
