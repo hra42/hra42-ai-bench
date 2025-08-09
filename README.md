@@ -78,6 +78,67 @@ npm run dev
 
 Visit [http://localhost:5173](http://localhost:5173) to access the application.
 
+## 🐳 Docker Deployment
+
+### Quick Start with Docker Compose
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/hra42/hra42-ai-bench.git
+cd hra42-ai-bench
+```
+
+2. **Configure environment**
+```bash
+cp .env.example .env
+# Edit .env and add your OpenRouter API key
+```
+
+3. **Build and run with Docker Compose**
+```bash
+docker compose up -d --build
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000)
+
+### Docker Commands
+
+```bash
+# View logs
+docker compose logs -f
+
+# Stop the application
+docker compose down
+
+# Stop and remove volumes (reset database)
+docker compose down -v
+
+# Rebuild after code changes
+docker compose up -d --build
+```
+
+### Docker Hub (Alternative)
+
+```bash
+# Run directly from Docker Hub (once published)
+docker run -d \
+  --name hra42-ai-bench \
+  -p 3000:3000 \
+  -e OPENROUTER_API_KEY=your-api-key \
+  -v hra42_data:/app/data \
+  hra42/ai-bench:latest
+```
+
+### Development with Docker
+
+For development with hot reload:
+
+```bash
+docker compose -f docker-compose.dev.yml up
+```
+
+Access the development server at [http://localhost:5173](http://localhost:5173)
+
 ## 🚀 Quick Start
 
 ### Running Your First Benchmark
@@ -363,10 +424,6 @@ All components follow atomic design principles:
 2. Create UI component in `src/lib/components/organisms/`
 3. Add execution logic in `src/routes/api/execute/+server.ts`
 4. Update result display in `src/lib/components/organisms/ModelResponseCard.svelte`
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### Development Process
 
