@@ -39,7 +39,6 @@ export interface ModelResponse {
 	id: string;
 	runId: string;
 	modelId: string;
-	modelName?: string;
 	status: 'pending' | 'running' | 'completed' | 'failed' | 'error';
 	responseText?: string;
 	responseJson?: string;
