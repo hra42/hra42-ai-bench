@@ -1,0 +1,123 @@
+name: Cleanup Container Images
+
+on:
+  delete:
+    # Trigger when any ref (tag or branch) is deleted
+  workflow_dispatch:
+    # Allow manual trigger for testing
+    inputs:
+      tag_name:
+        description: 'Tag name to delete images for'
+        required: true
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Get deleted tag name
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "delete" ]; then
+            if [ "${{ github.event.ref_type }}" = "tag" ]; then
+              echo "tag_name=${{ github.event.ref }}" >> $GITHUB_OUTPUT
+              echo "should_cleanup=true" >> $GITHUB_OUTPUT
+            else
+              echo "Not a tag deletion, skipping cleanup"
+              echo "should_cleanup=false" >> $GITHUB_OUTPUT
+            fi
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag_name=${{ inputs.tag_name }}" >> $GITHUB_OUTPUT
+            echo "should_cleanup=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_cleanup=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Delete container images
+        if: steps.get_tag.outputs.should_cleanup == 'true'
+        run: |
+          TAG_NAME="${{ steps.get_tag.outputs.tag_name }}"
+          echo "Git tag to delete: $TAG_NAME"
+          
+          # Convert git tag to container image tag (strip 'v' prefix if present)
+          CONTAINER_TAG=$(echo "$TAG_NAME" | sed 's/^v//')
+          echo "Looking for container images with tag: $CONTAINER_TAG"
+          
+          # Extract repo name from full repository name
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "Repository name: $REPO_NAME"
+          echo "Repository owner: ${{ github.repository_owner }}"
+          
+          # Try user endpoint first
+          echo "Trying user endpoint..."
+          USER_RESPONSE=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions")
+          
+          echo "User API response: $USER_RESPONSE"
+          
+          PACKAGE_VERSIONS=$(echo "$USER_RESPONSE" | jq -r --arg tag "$CONTAINER_TAG" '.[] | select(.metadata.container.tags[]? == $tag) | .id' 2>/dev/null)
+          
+          # If user endpoint fails, try org endpoint
+          if [ -z "$PACKAGE_VERSIONS" ]; then
+            echo "Trying org endpoint..."
+            ORG_RESPONSE=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions")
+            
+            echo "Org API response: $ORG_RESPONSE"
+            
+            PACKAGE_VERSIONS=$(echo "$ORG_RESPONSE" | jq -r --arg tag "$CONTAINER_TAG" '.[] | select(.metadata.container.tags[]? == $tag) | .id' 2>/dev/null)
+          fi
+          
+          if [ -z "$PACKAGE_VERSIONS" ]; then
+            echo "No images found for container tag $CONTAINER_TAG (from git tag $TAG_NAME)"
+            echo "This is expected if no container images exist for this tag"
+            exit 0
+          fi
+          
+          # Delete each version
+          for VERSION_ID in $PACKAGE_VERSIONS; do
+            echo "Deleting package version ID: $VERSION_ID"
+            
+            # Try user endpoint first
+            DELETE_RESULT=$(curl -s -w "%{http_code}" -X DELETE \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions/$VERSION_ID")
+            
+            HTTP_CODE=$(echo "$DELETE_RESULT" | tail -c 4)
+            
+            # If user endpoint fails, try org endpoint
+            if [ "$HTTP_CODE" != "204" ]; then
+              DELETE_RESULT=$(curl -s -w "%{http_code}" -X DELETE \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions/$VERSION_ID")
+              
+              HTTP_CODE=$(echo "$DELETE_RESULT" | tail -c 4)
+            fi
+            
+            if [ "$HTTP_CODE" = "204" ]; then
+              echo "Successfully deleted version $VERSION_ID"
+            else
+              echo "Failed to delete version $VERSION_ID (HTTP $HTTP_CODE)"
+            fi
+          done
+          
+          echo "Cleanup completed for git tag: $TAG_NAME (container tag: $CONTAINER_TAG)"
+
+      - name: Cleanup summary
+        if: steps.get_tag.outputs.should_cleanup == 'true'
+        run: |
+          echo "Container image cleanup completed for git tag: ${{ steps.get_tag.outputs.tag_name }}"
