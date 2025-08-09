@@ -4,6 +4,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=for-the-badge&logo=duckdb&logoColor=black)](https://duckdb.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg?style=for-the-badge)](http://unlicense.org/)
 
 ## 🚀 Overview
 
@@ -382,23 +384,46 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - Document complex logic
 - Keep components small and focused
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - [OpenRouter](https://openrouter.ai) for unified LLM API access
 - [SvelteKit](https://kit.svelte.dev) for the amazing framework
 - [DuckDB](https://duckdb.org) for the powerful embedded database
 - [Tailwind CSS](https://tailwindcss.com) for the utility-first CSS framework
+- [Docker](https://www.docker.com) for containerization support
 
-## 📞 Support
+## 📄 License
 
-- **Issues**: [GitHub Issues](https://github.com/hra42/hra42-ai-bench/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/hra42/hra42-ai-bench/discussions)
-- **Email**: support@hra42.com
+This project is released into the public domain under the **Unlicense** - see the [LICENSE](LICENSE) file for details.
 
----
+This means you can:
+- ✅ Use this software for any purpose
+- ✅ Modify and distribute it freely
+- ✅ Use it in commercial projects
+- ✅ Do whatever you want with it
 
-Built with ❤️ by the HRA42 team
+No attribution required, no restrictions imposed.
+
+### Unlicensing Contributions
+
+To ensure this project remains completely free and unencumbered by anyone's copyright monopoly,
+we require that all contributors explicitly dedicate their contributions to the public domain.
+
+**All contributions must include the following waiver:**
+
+```
+I dedicate any and all copyright interest in this software to the
+public domain. I make this dedication for the benefit of the public at
+large and to the detriment of my heirs and successors. I intend this
+dedication to be an overt act of relinquishment in perpetuity of all
+present and future rights to this software under copyright law.
+```
+
+#### How to Submit Your Waiver
+
+For any non-trivial contribution:
+
+1. **Include the waiver in your pull request description**
+2. **OR** Add the waiver as a comment in the relevant issue
+3. Sign your commits
+   - Follow this GitHub Documenation: https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits

@@ -2,8 +2,39 @@
 
 Thank you for your interest in contributing to HRA42 AI Bench! This document provides guidelines and instructions for contributing to the project.
 
+## ⚠️ IMPORTANT: Copyright Waiver Required
+
+**All contributions to this project must include a copyright waiver.** This project is released under the Unlicense into the public domain. To maintain this status, we require all contributors to explicitly dedicate their contributions to the public domain.
+
+### Required Waiver Statement
+
+**You must include the following statement with every contribution:**
+
+```
+I dedicate any and all copyright interest in this software to the
+public domain. I make this dedication for the benefit of the public at
+large and to the detriment of my heirs and successors. I intend this
+dedication to be an overt act of relinquishment in perpetuity of all
+present and future rights to this software under copyright law.
+```
+
+### How to Submit Your Waiver
+
+- **Pull Requests**: Include the waiver in your PR description
+- **Issues**: Add the waiver when submitting code in issues
+- **Major Contributors**: Sign a digital WAIVER file with GPG
+
+### Corporate Contributors
+
+If contributing as an employee, you must also provide a copyright disclaimer from your employer.
+
+**Contributions without this waiver will not be accepted.**
+
+---
+
 ## Table of Contents
 
+- [Copyright Waiver](#️-important-copyright-waiver-required)
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
