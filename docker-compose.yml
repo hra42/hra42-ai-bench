@@ -1,0 +1,41 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hra42-ai-bench:latest
+    container_name: hra42-ai-bench
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - DATABASE_PATH=/app/data/hra42.duckdb
+      - PUBLIC_APP_NAME=${PUBLIC_APP_NAME:-HRA42 AI Bench}
+      - PUBLIC_MAX_FILE_SIZE=${PUBLIC_MAX_FILE_SIZE:-20971520}
+      - PORT=3000
+      - HOST=0.0.0.0
+    volumes:
+      # Persist database
+      - duckdb_data:/app/data
+      # Persist uploaded files
+      - upload_data:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  duckdb_data:
+    driver: local
+  upload_data:
+    driver: local
