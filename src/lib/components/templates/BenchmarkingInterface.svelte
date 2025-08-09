@@ -5,6 +5,8 @@
 	import BenchmarkConfigurator from '../organisms/BenchmarkConfigurator.svelte';
 	import ModelComparisonGrid from '../organisms/ModelComparisonGrid.svelte';
 	import CostBreakdown from '../organisms/CostBreakdown.svelte';
+	import ExportDialog from '../molecules/ExportDialog.svelte';
+	import { downloadFile, generateExportFilename, exportToCSV, exportToJSON, type ExportFormat } from '$lib/utils/export';
 
 	export let availableModels: Array<{ id: string; name: string; provider: string }> = [];
 	export let selectedModels: string[] = [];
@@ -45,8 +47,12 @@
 		outputTokens: number;
 	}> = [];
 	export let isRunning = false;
+	export let runId: string | null = null;
 
 	const dispatch = createEventDispatcher();
+	
+	let showExportDialog = false;
+	let exportLoading = false;
 
 	function handleExecute() {
 		dispatch('execute', {
@@ -65,6 +71,108 @@
 
 	function handleCancel() {
 		dispatch('cancel');
+	}
+
+	function handleExportClick() {
+		showExportDialog = true;
+	}
+
+	async function handleExport(event: CustomEvent<{ format: ExportFormat }>) {
+		const { format } = event.detail;
+		exportLoading = true;
+
+		try {
+			// If we have a runId from the database, export from the API
+			// Otherwise export the current session data
+			if (runId) {
+				// Export from the database
+				const response = await fetch('/api/export', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						format,
+						runId
+					})
+				});
+
+				if (!response.ok) {
+					throw new Error(`Export failed: ${response.statusText}`);
+				}
+
+				const blob = await response.blob();
+				const filename = generateExportFilename(format, benchmarkName || 'benchmark');
+				await downloadFile(blob, filename);
+			} else {
+				// Export current session data
+				const exportData = {
+					run: {
+						id: runId || `session_${Date.now()}`,
+						name: benchmarkName || 'Untitled Benchmark',
+						benchmarkType,
+						status: (isRunning ? 'running' : 'completed') as 'running' | 'completed',
+						totalModels: selectedModels.length,
+						completedModels: responses.filter(r => r.status === 'completed').length,
+						systemPrompt,
+						userPrompt: prompt,
+						maxTokens,
+						temperature,
+						totalCost: costBreakdown.reduce((sum, m) => sum + m.totalCost, 0),
+						startedAt: new Date(),
+						completedAt: isRunning ? undefined : new Date(),
+						createdAt: new Date()
+					},
+					responses: responses.map(r => ({
+						id: `${r.modelId}_${Date.now()}`,
+						runId: runId || `session_${Date.now()}`,
+						modelId: r.modelId,
+						modelName: r.modelName,
+						status: r.status,
+						responseText: r.response,
+						responseJson: r.responseJson,
+						toolCalls: r.toolCalls,
+						errorMessage: r.error,
+						promptTokens: r.inputTokens,
+						completionTokens: r.outputTokens,
+						totalTokens: (r.inputTokens || 0) + (r.outputTokens || 0),
+						cost: r.cost,
+						latencyMs: r.duration,
+						openrouterLatencyMs: r.openRouterLatencyMs,
+						generationTimeMs: r.generationTimeMs,
+						tokensPerSecond: r.tokensPerSecond,
+						startedAt: new Date(),
+						completedAt: r.status === 'completed' ? new Date() : undefined,
+						createdAt: new Date()
+					})),
+					metadata: {
+						exportDate: new Date(),
+						totalCost: costBreakdown.reduce((sum, m) => sum + m.totalCost, 0)
+					}
+				};
+
+				let content: string;
+				const filename = generateExportFilename(format, benchmarkName || 'benchmark');
+				
+				switch (format) {
+					case 'csv':
+						content = exportToCSV(exportData);
+						await downloadFile(content, filename, 'text/csv');
+						break;
+					case 'json':
+						content = exportToJSON(exportData);
+						await downloadFile(content, filename, 'application/json');
+						break;
+				}
+			}
+			
+			showExportDialog = false;
+		} catch (error) {
+			console.error('Export error:', error);
+			dispatch('error', { error: 'Failed to export data' });
+		} finally {
+			exportLoading = false;
+		}
 	}
 </script>
 
@@ -129,7 +237,12 @@
 			{#if responses.length > 0}
 				<div class="space-y-6">
 					<div>
-						<h2 class="mb-4 text-xl font-semibold text-slate-900 dark:text-white">Results</h2>
+						<div class="mb-4 flex items-center justify-between">
+							<h2 class="text-xl font-semibold text-slate-900 dark:text-white">Results</h2>
+							<Button variant="secondary" size="sm" on:click={handleExportClick}>
+								Export Results
+							</Button>
+						</div>
 						<ModelComparisonGrid {responses} {benchmarkType} {jsonSchema} />
 					</div>
 
@@ -141,3 +254,10 @@
 		</div>
 	</div>
 </div>
+
+<ExportDialog
+	bind:isOpen={showExportDialog}
+	loading={exportLoading}
+	on:export={handleExport}
+	on:close={() => showExportDialog = false}
+/>

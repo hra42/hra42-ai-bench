@@ -53,10 +53,12 @@
 		outputTokens: number;
 	}> = [];
 	let isRunning = false;
+	let currentRunId: string | null = null;
 
 	function handleStreamEvent(eventType: string, data: any) {
 		switch (eventType) {
 			case 'run_started':
+				currentRunId = data.runId;
 				break;
 
 			case 'model_started':
@@ -345,6 +347,7 @@
 	{responses}
 	{costBreakdown}
 	{isRunning}
+	runId={currentRunId}
 	on:execute={handleExecute}
 	on:cancel={handleCancel}
 />
