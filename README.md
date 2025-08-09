@@ -1,448 +1,404 @@
-# HRA42 Bench - LLM Comparison Platform
+# HRA42 AI Bench - Advanced LLM Benchmarking Platform
 
-## Complete Development Plan
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=svelte&logoColor=white)](https://kit.svelte.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=for-the-badge&logo=duckdb&logoColor=black)](https://duckdb.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 
----
+## 🚀 Overview
 
-## Executive Summary
+HRA42 AI Bench is a comprehensive benchmarking platform for comparing Large Language Model (LLM) performance across multiple dimensions. Built with modern web technologies, it provides real-time comparison of various AI models through OpenRouter's unified API, with detailed metrics tracking and cost analysis.
 
-HRA42 Bench is a streamlined SvelteKit application designed to benchmark Large Language Model (LLM) performance across multiple dimensions. It enables users to run benchmarks on various models simultaneously through OpenRouter's unified API, providing visual comparisons of responses, costs, and performance metrics.
+### ✨ Key Features
 
-### Key Features
+- **🎯 Multi-Modal Benchmarking**: Test models across text generation, structured output, vision analysis, and document processing
+- **⚡ Real-Time Comparison**: Execute benchmarks on multiple models simultaneously with live streaming results
+- **💰 Cost Tracking**: Detailed cost analysis per model, per token, and per benchmark run
+- **📊 Performance Analytics**: Comprehensive metrics including response time, token usage, and quality scores
+- **🗄️ Historical Analysis**: Track model performance over time with trend detection
+- **🎨 Modern UI**: Responsive, accessible interface built with Tailwind CSS
+- **🔒 Privacy-First**: All data stored locally using embedded DuckDB database
 
-- **Multi-modal Benchmarking**: Text, structured output, vision, and document processing
-- **Simultaneous Comparison**: Benchmark multiple models with one request
-- **Cost & Performance Tracking**: Real-time metrics and historical tracking
-- **EU-First Technology**: Built with DuckDB for data persistence
-- **Composable UI**: Fully Tailwind CSS with atomic component design
+## 📋 Table of Contents
 
----
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [API Documentation](#-api-documentation)
+- [User Guide](#-user-guide)
+- [Development](#-development)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## Technical Architecture
+## 🛠️ Installation
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or pnpm
+- OpenRouter API key ([Get one here](https://openrouter.ai))
+
+### Setup
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/hra42/hra42-ai-bench.git
+cd hra42-ai-bench
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Configure environment variables**
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your OpenRouter API key:
+```env
+OPENROUTER_API_KEY=your-api-key-here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+DATABASE_PATH=data/hra42.duckdb
+```
+
+4. **Initialize the database**
+```bash
+npm run db:init
+```
+
+5. **Start the development server**
+```bash
+npm run dev
+```
+
+Visit [http://localhost:5173](http://localhost:5173) to access the application.
+
+## 🚀 Quick Start
+
+### Running Your First Benchmark
+
+1. **Navigate to the Benchmark page** from the main dashboard
+2. **Select benchmark type** (Text, Structured, Vision, etc.)
+3. **Choose models** to compare from the dropdown
+4. **Configure your prompt** or upload files
+5. **Click "Execute Benchmark"** to start
+6. **View real-time results** as they stream in
+
+### Example: Text Generation Benchmark
+
+```typescript
+// Example prompt configuration
+const benchmark = {
+  type: 'text',
+  prompt: 'Explain quantum computing in simple terms',
+  models: ['gpt-4', 'claude-3-opus', 'gemini-pro'],
+  temperature: 0.7,
+  maxTokens: 500
+}
+```
+
+## 🎯 Features
+
+### Benchmark Types
+
+#### 📝 Text Generation
+Compare how different models respond to the same prompt with detailed token usage and cost analysis.
+
+#### 🔧 Structured Output
+Test models' ability to generate valid JSON according to specified schemas.
+
+#### 🛠️ Function Calling
+Evaluate how well models understand and execute function definitions.
+
+#### 🖼️ Vision Analysis
+Compare image understanding capabilities across vision-enabled models.
+
+#### 📄 Document Processing
+Test PDF processing and document understanding abilities.
+
+### Advanced Features
+
+#### 🔄 Real-Time Streaming
+- Server-Sent Events for live updates
+- Progressive response rendering
+- Concurrent model execution
+
+#### 📊 Analytics Dashboard
+- Cost per token analysis
+- Response time comparison
+- Quality metrics tracking
+- Historical trend analysis
+
+#### 💾 Data Management
+- Export results to CSV/JSON
+- Save benchmark templates
+- Historical data browsing
+- Batch result comparison
+
+## 🏗️ Architecture
 
 ### Technology Stack
 
-- **Framework**: SvelteKit (Full-stack)
-- **Database**: DuckDB (EU-based embedded database)
-- **Styling**: Tailwind CSS (utility-first, no custom CSS)
-- **Language**: TypeScript
-- **API Integration**: OpenRouter (exclusive LLM provider)
-- **File Handling**: Temporary processing for multimodal inputs
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | SvelteKit | Full-stack framework |
+| Styling | Tailwind CSS v4 | Utility-first CSS |
+| Database | DuckDB | Embedded analytics |
+| API | OpenRouter | Unified LLM access |
+| Language | TypeScript | Type safety |
+| State | Svelte Stores | Reactive state management |
 
 ### Project Structure
 
 ```
-hra42-bench/
+hra42-ai-bench/
 ├── src/
-│   ├── routes/
-│   │   ├── +layout.svelte           # Root layout
-│   │   ├── +page.svelte              # Dashboard/home
-│   │   ├── benchmark/
-│   │   │   └── +page.svelte          # Main benchmarking interface
-│   │   ├── history/
-│   │   │   └── +page.svelte          # Historical results
-│   │   └── api/
-│   │       ├── models/
-│   │       ├── execute/
-│   │       └── results/
+│   ├── routes/              # Pages and API endpoints
+│   │   ├── benchmark/       # Main benchmarking interface
+│   │   ├── history/         # Historical results viewer
+│   │   └── api/            # Backend API routes
 │   ├── lib/
-│   │   ├── server/
-│   │   │   ├── db/
-│   │   │   │   ├── client.ts         # DuckDB connection
-│   │   │   │   ├── schema.ts         # Table definitions
-│   │   │   │   └── queries.ts        # Query functions
-│   │   │   └── openrouter/
-│   │   │       ├── client.ts         # API client
-│   │   │       ├── types.ts          # Response types
-│   │   │       └── pricing.ts        # Cost calculations
-│   │   ├── components/
-│   │   │   ├── atoms/                # Base components
-│   │   │   ├── molecules/            # Composed components
-│   │   │   ├── organisms/            # Complex sections
-│   │   │   ├── templates/            # Page templates
-│   │   │   └── layouts/              # Layout wrappers
-│   │   ├── stores/
-│   │   │   ├── benchmark.ts          # Benchmark configuration
-│   │   │   ├── results.ts            # Result management
-│   │   │   └── models.ts             # Model availability
-│   │   ├── types/
-│   │   │   ├── benchmark.ts          # Benchmark type definitions
-│   │   │   ├── model.ts              # Model interfaces
-│   │   │   └── response.ts           # Response types
-│   │   └── utils/
-│   │       ├── cn.ts                 # Class name utilities
-│   │       └── format.ts             # Formatters
-├── static/                            # Static assets
-├── data/
-│   └── hra42.duckdb                  # Database file
-└── app.d.ts                          # App type definitions
+│   │   ├── server/         # Server-side code
+│   │   │   ├── db/         # DuckDB integration
+│   │   │   └── openrouter/ # API client
+│   │   ├── components/     # UI components (atomic design)
+│   │   │   ├── atoms/      # Basic components
+│   │   │   ├── molecules/  # Composed components
+│   │   │   ├── organisms/  # Complex sections
+│   │   │   └── templates/  # Page layouts
+│   │   ├── stores/         # State management
+│   │   ├── types/          # TypeScript definitions
+│   │   └── utils/          # Helper functions
+│   └── app.html            # App shell
+├── static/                 # Static assets
+├── tests/                  # Test files
+└── data/                   # Database storage
 ```
 
----
+### Database Schema
 
-## Component Architecture
+```sql
+-- Core tables
+CREATE TABLE benchmark_runs (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    prompt TEXT,
+    config JSON,
+    status TEXT,
+    created_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
 
-### Design System Philosophy
+CREATE TABLE model_responses (
+    id TEXT PRIMARY KEY,
+    run_id TEXT REFERENCES benchmark_runs(id),
+    model TEXT NOT NULL,
+    response TEXT,
+    tokens_used INTEGER,
+    cost DECIMAL(10,6),
+    latency_ms INTEGER,
+    error TEXT,
+    metadata JSON
+);
 
-- **Utility-First**: Every style is a Tailwind class
-- **Composition Over Inheritance**: Small, focused components that combine
-- **Consistency Through Constraints**: Use Tailwind's default scale
-- **Responsive by Default**: Mobile-first approach
-
-### Component Hierarchy
-
-#### Atoms (Base Components)
-
-```
-atoms/
-├── Button.svelte         # Variants: primary, secondary, ghost, danger
-├── Input.svelte          # Text input with consistent styling
-├── Card.svelte           # Container with padding/shadow
-├── Badge.svelte          # Model/status indicators
-├── Icon.svelte           # Icon wrapper component
-├── Spinner.svelte        # Loading indicator
-├── Avatar.svelte         # Model provider logos
-└── Divider.svelte        # Section separator
-```
-
-#### Molecules (Composed Components)
-
-```
-molecules/
-├── ModelSelector.svelte      # Multi-select with search
-├── CostDisplay.svelte        # Formatted cost with trend
-├── MetricCard.svelte         # Stat display card
-├── PromptInput.svelte        # Enhanced textarea
-├── FileUploader.svelte       # Drag-drop file input
-├── ResponseTime.svelte       # Duration display
-├── TokenCounter.svelte       # Usage visualization
-└── StatusIndicator.svelte    # Execution status
+CREATE TABLE models (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    provider TEXT,
+    context_length INTEGER,
+    pricing JSON,
+    capabilities JSON,
+    updated_at TIMESTAMP
+);
 ```
 
-#### Organisms (Complex Sections)
+## 📚 API Documentation
 
-```
-organisms/
-├── BenchmarkConfigurator.svelte  # Benchmark type selection & config
-├── ModelComparisonGrid.svelte    # Results grid layout
-├── ResponseViewer.svelte          # Formatted response display
-├── HistoryTable.svelte            # Sortable results table
-├── CostBreakdown.svelte           # Cost visualization
-├── BenchmarkRunner.svelte         # Execution progress
-└── ModelResponseCard.svelte       # Complete result card
-```
+### Core Endpoints
 
-#### Templates (Page Compositions)
+#### `GET /api/models`
+Fetch available models from OpenRouter.
 
-```
-templates/
-├── BenchmarkingInterface.svelte   # Main benchmark page structure
-├── DashboardView.svelte           # Home page layout
-└── HistoryView.svelte             # Results browser layout
-```
-
-### Tailwind Configuration
-
-#### Color System
-
-- **Primary**: Blue spectrum (`blue-500` to `blue-700`)
-- **Success**: Green (`green-500`)
-- **Warning**: Amber (`amber-500`)
-- **Danger**: Red (`red-500`)
-- **Neutral**: Slate (`slate-50` to `slate-900`)
-
-#### Spacing Patterns
-
-- **Cards**: `p-4 md:p-6`
-- **Sections**: `py-8 md:py-12`
-- **Component gaps**: `space-y-4` or `gap-4`
-- **Inline spacing**: `space-x-2`
-
-#### Responsive Breakpoints
-
-- **Mobile**: Base styles
-- **Tablet**: `md:` (768px)
-- **Desktop**: `lg:` (1024px)
-- **Wide**: `xl:` (1280px)
-
----
-
-## Database Schema
-
-### DuckDB Tables
-
-**benchmark_runs**
-
-- Core benchmark execution tracking
-- Stores benchmark configuration and status
-- Links to all related model responses
-
-**model_responses**
-
-- Individual model response data
-- Performance metrics and costs
-- Error states and metadata
-
-**models**
-
-- Cached model information
-- Pricing and capability data
-- Updated periodically from OpenRouter
-
-**benchmark_templates**
-
-- Reusable benchmark configurations
-- Named templates for common benchmarks
-
----
-
-## Core Features Implementation
-
-### 1. Benchmark Types
-
-#### Text Generation
-
-- Simple prompt input
-- Response comparison
-- Token usage tracking
-
-#### Structured Output
-
-- JSON schema definition
-- Schema compliance visualization
-- Format validation display
-
-#### Tool/Function Calling
-
-- Function definition interface
-- Call sequence display
-- Parameter matching
-
-#### Vision Analysis
-
-- Image upload (drag & drop)
-- Base64 encoding for API
-- Visual response comparison
-
-#### Document Processing
-
-- PDF upload support
-- Text extraction comparison
-- Table/structure detection
-
-### 2. Benchmark Execution Flow
-
-```mermaid
-graph TD
-    A[User Configures Benchmark] --> B[Select Models]
-    B --> C[Input Prompt/Files]
-    C --> D[Initialize Benchmark Run]
-    D --> E[Queue Model Requests]
-    E --> F[Execute Sequentially]
-    F --> G[Stream Responses]
-    G --> H[Calculate Metrics]
-    H --> I[Display Results]
-    I --> J[Save to DuckDB]
+**Response:**
+```json
+{
+  "models": [
+    {
+      "id": "openai/gpt-4",
+      "name": "GPT-4",
+      "contextLength": 8192,
+      "pricing": {
+        "prompt": 0.03,
+        "completion": 0.06
+      }
+    }
+  ]
+}
 ```
 
-### 3. Real-time Updates
+#### `POST /api/execute`
+Execute a benchmark run.
 
-- Server-Sent Events for progress
-- Streaming response display
-- Live cost calculation
-- Progressive result rendering
-
-### 4. Historical Analysis
-
-- Trend detection over time
-- Model performance changes
-- Cost efficiency tracking
-- Response quality shifts
-
----
-
-## User Interface Flow
-
-### Main Benchmarking Interface
-
-#### Layout Structure
-
-```
-┌─────────────────────────────────────┐
-│         Navigation Bar              │
-├─────────────────────────────────────┤
-│  Benchmark Configuration            │
-│  ┌─────────────────────────────┐   │
-│  │ [Text] [JSON] [Tool] [Image]│   │
-│  └─────────────────────────────┘   │
-│  ┌─────────────────────────────┐   │
-│  │ Model Selection              │   │
-│  │ □ GPT-4  □ Claude  □ Gemini │   │
-│  └─────────────────────────────┘   │
-│  ┌─────────────────────────────┐   │
-│  │ Input Area                   │   │
-│  └─────────────────────────────┘   │
-│  [Execute Benchmark]                │
-├─────────────────────────────────────┤
-│  Results Comparison                 │
-│  ┌──────┐ ┌──────┐ ┌──────┐       │
-│  │Model1│ │Model2│ │Model3│       │
-│  │Result│ │Result│ │Result│       │
-│  └──────┘ └──────┘ └──────┘       │
-└─────────────────────────────────────┘
+**Request:**
+```json
+{
+  "type": "text",
+  "models": ["gpt-4", "claude-3"],
+  "prompt": "Your prompt here",
+  "config": {
+    "temperature": 0.7,
+    "maxTokens": 500
+  }
+}
 ```
 
-### Responsive Behavior
+#### `GET /api/execute/stream`
+Stream benchmark execution results via Server-Sent Events.
 
-- **Mobile**: Stack components vertically
-- **Tablet**: 2-column grid for results
-- **Desktop**: 3-4 column grid for results
+#### `GET /api/results/:runId`
+Fetch results for a specific benchmark run.
 
----
+#### `GET /api/history`
+Retrieve historical benchmark data with filtering options.
 
-## Implementation Phases
+#### `POST /api/export`
+Export benchmark results in various formats (CSV, JSON, Excel).
 
-### Phase 1: Foundation (Week 1) ✅
+## 📖 User Guide
 
-- [x] SvelteKit project setup
-- [x] Tailwind CSS configuration
-- [x] DuckDB integration (using new @duckdb/node-api)
-- [x] Basic component library (atoms)
-- [x] OpenRouter client setup
-- [x] Database schema creation
+### Workflow Examples
 
-### Phase 2: Core Benchmarking (Week 2) ✅
+#### Comparing Model Creativity
+1. Select "Text Generation" benchmark type
+2. Choose creative writing models
+3. Set temperature to 0.9 for more creative outputs
+4. Enter a creative prompt
+5. Compare responses for originality and coherence
 
-- [x] Text generation benchmarking
-- [x] Model selection interface
-- [x] Benchmark execution pipeline
-- [x] Real-time progress updates
-- [x] Basic result display
-- [x] Cost calculation
+#### Testing JSON Generation
+1. Select "Structured Output" benchmark
+2. Define your JSON schema
+3. Choose models with JSON mode support
+4. Execute and validate schema compliance
 
-### Phase 3: UI Components (Week 3)
+#### Analyzing Images
+1. Select "Vision Analysis" benchmark
+2. Upload image (JPEG, PNG, WebP)
+3. Choose vision-capable models
+4. Add analysis prompt
+5. Compare interpretation accuracy
 
-- [x] Complete molecule components
-- [x] Organism components
-- [x] Page templates
-- [x] Responsive layouts
-- [x] Loading states
-- [x] Error handling
-- [x] Dark Mode
+### Best Practices
 
-### Phase 4: Advanced Benchmarks (Week 4)
+- **Model Selection**: Choose 3-5 models for optimal comparison
+- **Prompt Engineering**: Use clear, specific prompts for consistent results
+- **Cost Management**: Monitor token usage and set limits
+- **Template Usage**: Save successful benchmark configurations
+- **Export Strategy**: Regular exports for long-term analysis
 
-- [x] Structured output benchmarking
-- [x] Function calling benchmarks
-- [x] Image upload and processing
-- [x] PDF handling
+## 🔧 Development
 
-### Phase 5: Analytics & Polish (Week 5)
+### Commands
 
-- [ ] Historical data views
-- [ ] Trend analysis
-- [ ] Export functionality
-- [ ] Performance optimization
-- [ ] UI refinements
-- [ ] Documentation
+```bash
+# Development
+npm run dev        # Start dev server with hot reload
+npm run build      # Build for production
+npm run preview    # Preview production build
 
----
+# Code Quality
+npm run check      # Type checking
+npm run lint       # Linting and formatting check
+npm run format     # Auto-format code
 
-## Technical Implementation Details
+# Database
+npm run db:init    # Initialize database
+npm run db:migrate # Run migrations
+npm run db:seed    # Seed sample data
 
-### OpenRouter Integration
-
-#### Client Configuration
-
-- API key management
-- Base URL configuration
-- Timeout settings
-- Retry logic for failures
-
-#### Request Handling
-
-- Rate limiting per model
-- Automatic retry logic
-- Error categorization
-- Streaming support
-
-### File Processing
-
-#### Image Handling
-
-- Accept: JPEG, PNG, WebP
-- Max size: 20MB (configurable)
-- Base64 encoding for API
-- Preview generation
-
-#### PDF Processing
-
-- Text extraction
-- Page limit handling
-- Structure preservation
-- Error recovery
-
-### Performance Optimizations
-
-#### Frontend
-
-- Lazy loading for history
-- Virtual scrolling for large lists
-- Debounced search inputs
-- Memoized expensive computations
-
-#### Backend
-
-- Cached model information
-- Batch insert for results
-- Indexed queries
-
----
-
-## Development Workflow
-
-### Environment Setup
-
-- Development server with hot reload
-- Database initialization scripts
-- Migration support for schema changes
-- Production build process
+# Testing
+npm run test       # Run tests
+npm run test:ui    # Run tests with UI
+```
 
 ### Environment Variables
 
-- `OPENROUTER_API_KEY` - Your OpenRouter API key (required)
-- `OPENROUTER_BASE_URL` - API base URL (optional, defaults to `https://openrouter.ai/api/v1`)
-- `DATABASE_PATH` - DuckDB database file location (optional, defaults to `data/hra42.duckdb`)
-- `PUBLIC_APP_NAME` - Application name for branding (optional)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OPENROUTER_API_KEY` | OpenRouter API key | Required |
+| `OPENROUTER_BASE_URL` | API base URL | `https://openrouter.ai/api/v1` |
+| `DATABASE_PATH` | DuckDB file location | `data/hra42.duckdb` |
+| `PUBLIC_APP_NAME` | Application name | `HRA42 AI Bench` |
+| `PUBLIC_MAX_FILE_SIZE` | Max upload size | `20971520` (20MB) |
+
+### Component Development
+
+All components follow atomic design principles:
+
+```svelte
+<!-- Example: atoms/Button.svelte -->
+<script lang="ts">
+  export let variant: 'primary' | 'secondary' = 'primary';
+  export let size: 'sm' | 'md' | 'lg' = 'md';
+</script>
+
+<button
+  class="px-4 py-2 rounded-lg transition-colors
+         {variant === 'primary' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
+         {size === 'sm' ? 'text-sm' : ''}"
+  on:click
+>
+  <slot />
+</button>
+```
+
+### Adding New Benchmark Types
+
+1. Define type in `src/lib/types/benchmark.ts`
+2. Create UI component in `src/lib/components/organisms/`
+3. Add execution logic in `src/routes/api/execute/+server.ts`
+4. Update result display in `src/lib/components/organisms/ModelResponseCard.svelte`
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Process
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+
+- Follow TypeScript best practices
+- Use Tailwind utility classes exclusively
+- Write comprehensive tests
+- Document complex logic
+- Keep components small and focused
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [OpenRouter](https://openrouter.ai) for unified LLM API access
+- [SvelteKit](https://kit.svelte.dev) for the amazing framework
+- [DuckDB](https://duckdb.org) for the powerful embedded database
+- [Tailwind CSS](https://tailwindcss.com) for the utility-first CSS framework
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/hra42/hra42-ai-bench/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/hra42/hra42-ai-bench/discussions)
+- **Email**: support@hra42.com
 
 ---
 
-## Deployment Considerations
-
-### Self-Hosted Deployment
-
-- Single Docker container
-- Volume mount for DuckDB
-- Environment variable configuration
-- Health check endpoint
-
-## Success Metrics
-
-### Technical Goals
-
-- Sub-second page loads
-- Real-time streaming responses
-- Zero data loss
-
-### User Experience Goals
-
-- Intuitive benchmark configuration
-- Clear result comparison
-- Accurate cost tracking
-- Useful historical insights
-
----
-
-## Conclusion
-
-HRA42 Bench provides a focused, efficient solution for comparing LLM performance across multiple dimensions. By leveraging SvelteKit's full-stack capabilities, DuckDB's analytical power, and Tailwind's utility-first approach, we create a maintainable, performant application that delivers immediate value for LLM evaluation and selection.
+Built with ❤️ by the HRA42 team
