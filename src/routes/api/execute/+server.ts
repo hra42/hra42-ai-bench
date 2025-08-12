@@ -286,7 +286,7 @@ async function processModels(
 			// Log if we received usage data
 			if (promptTokens || completionTokens) {
 				console.log(
-					`Received usage data for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
+					`Processed usage data for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
 				);
 			}
 
@@ -300,6 +300,14 @@ async function processModels(
 					await new Promise((resolve) => setTimeout(resolve, 1000));
 					const generation = await client.getGeneration(generationId);
 
+					// Log the raw generation response for debugging (only if debug mode is enabled)
+					if (env.DEBUG_API_RESPONSES === 'true') {
+						console.log(
+							`Raw Generation API response for ${modelId}:`,
+							JSON.stringify(generation, null, 2)
+						);
+					}
+
 					if (generation && typeof generation === 'object' && 'usage' in generation) {
 						const genUsage = generation.usage as any;
 						if (genUsage?.prompt_tokens || genUsage?.completion_tokens) {
@@ -308,7 +316,7 @@ async function processModels(
 							totalTokens = genUsage.total_tokens || promptTokens + completionTokens;
 							cost = genUsage.cost || 0;
 							console.log(
-								`Successfully retrieved usage data from Generation API for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
+								`Successfully processed usage data from Generation API for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
 							);
 						}
 					}
