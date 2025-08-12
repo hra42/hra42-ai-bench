@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types';
 import { getOpenRouterClient } from '$lib/server/openrouter/client';
 import { SimplifiedDBClient } from '$lib/server/db/client';
 import type { BenchmarkConfig } from '$lib/types/benchmark';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const {
@@ -287,6 +288,15 @@ export const POST: RequestHandler = async ({ request }) => {
 										// Check for usage data in the stream (OpenRouter sends it at the end)
 										if (parsed.usage) {
 											usageReceived = true;
+
+											// Log the raw usage data for debugging (only if debug mode is enabled)
+											if (env.DEBUG_API_RESPONSES === 'true') {
+												console.log(
+													`Raw usage data received for model ${modelId}:`,
+													JSON.stringify(parsed.usage, null, 2)
+												);
+											}
+
 											const currentTime = Date.now() - startTime;
 											// Calculate actual cost from usage data
 											// Handle scientific notation and ensure it's a valid number

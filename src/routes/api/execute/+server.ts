@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { getOpenRouterClient } from '$lib/server/openrouter/client';
 import { SimplifiedDBClient } from '$lib/server/db/client';
 import type { BenchmarkConfig } from '$lib/types/benchmark';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -258,6 +259,23 @@ async function processModels(
 
 			const latencyMs = Date.now() - startTime;
 			const generationId = response.id || null;
+
+			// Log the raw response for debugging (only if debug mode is enabled)
+			if (env.DEBUG_API_RESPONSES === 'true') {
+				const responseLog = {
+					...response,
+					choices: response.choices?.map((c: any) => ({
+						...c,
+						message: {
+							...c.message,
+							content: c.message?.content
+								? `[content: ${typeof c.message.content === 'string' ? c.message.content.substring(0, 100) + '...' : 'structured'}]`
+								: undefined
+						}
+					}))
+				};
+				console.log(`Raw API response for model ${modelId}:`, JSON.stringify(responseLog, null, 2));
+			}
 
 			// Check if we got usage data
 			let promptTokens = response.usage?.prompt_tokens || 0;
