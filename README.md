@@ -117,16 +117,16 @@ docker compose down -v
 docker compose up -d --build
 ```
 
-### Docker Hub (Alternative)
+### GitHub Container Registry
 
 ```bash
-# Run directly from Docker Hub (once published)
+# Run directly from GitHub Container Registry
 docker run -d \
   --name hra42-ai-bench \
   -p 3000:3000 \
   -e OPENROUTER_API_KEY=your-api-key \
   -v hra42_data:/app/data \
-  hra42/ai-bench:latest
+  ghcr.io/hra42/hra42-ai-bench:latest
 ```
 
 ### Development with Docker
