@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types';
 import { getOpenRouterClient } from '$lib/server/openrouter/client';
 import { SimplifiedDBClient } from '$lib/server/db/client';
 import type { BenchmarkConfig } from '$lib/types/benchmark';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const {
@@ -287,6 +288,15 @@ export const POST: RequestHandler = async ({ request }) => {
 										// Check for usage data in the stream (OpenRouter sends it at the end)
 										if (parsed.usage) {
 											usageReceived = true;
+
+											// Log the raw usage data for debugging (only if debug mode is enabled)
+											if (env.DEBUG_API_RESPONSES === 'true') {
+												console.log(
+													`Raw usage data received for model ${modelId}:`,
+													JSON.stringify(parsed.usage, null, 2)
+												);
+											}
+
 											const currentTime = Date.now() - startTime;
 											// Calculate actual cost from usage data
 											// Handle scientific notation and ensure it's a valid number
@@ -326,7 +336,7 @@ export const POST: RequestHandler = async ({ request }) => {
 											);
 
 											console.log(
-												`Received usage data for model ${modelId}: ${parsed.usage.prompt_tokens} prompt, ${parsed.usage.completion_tokens} completion tokens, cost: $${actualCost}`
+												`Processed usage data for model ${modelId}: ${parsed.usage.prompt_tokens} prompt, ${parsed.usage.completion_tokens} completion tokens, cost: $${actualCost}`
 											);
 
 											// Send immediate cost update
@@ -373,6 +383,14 @@ export const POST: RequestHandler = async ({ request }) => {
 										);
 										const generation = await client.getGeneration(generationId);
 
+										// Log the raw generation response for debugging (only if debug mode is enabled)
+										if (env.DEBUG_API_RESPONSES === 'true') {
+											console.log(
+												`Raw Generation API response for ${modelId}:`,
+												JSON.stringify(generation, null, 2)
+											);
+										}
+
 										// Check if we got usage data from the generation endpoint
 										if (generation && typeof generation === 'object' && 'usage' in generation) {
 											const genUsage = generation.usage as any;
@@ -403,7 +421,7 @@ export const POST: RequestHandler = async ({ request }) => {
 												totalCost += genCost;
 												usageFromGeneration = true;
 												console.log(
-													`Successfully retrieved usage data from Generation API for model ${modelId}: ${genUsage.prompt_tokens} prompt, ${genUsage.completion_tokens} completion tokens, cost: $${genCost}`
+													`Successfully processed usage data from Generation API for model ${modelId}: ${genUsage.prompt_tokens} prompt, ${genUsage.completion_tokens} completion tokens, cost: $${genCost}`
 												);
 
 												// Send usage update
@@ -441,7 +459,10 @@ export const POST: RequestHandler = async ({ request }) => {
 										`Using estimated usage for model ${modelId}: ${estimatedPromptTokens} prompt, ${estimatedCompletionTokens} completion tokens (no usage data received)`
 									);
 
-									// Try to get model pricing from database
+									// Try to get model pricing from database first
+									let promptPrice = 0;
+									let completionPrice = 0;
+
 									const modelData = await db.all(
 										`SELECT pricing_prompt, pricing_completion FROM models WHERE id = ?`,
 										[modelId]
@@ -449,9 +470,30 @@ export const POST: RequestHandler = async ({ request }) => {
 
 									if (modelData.length > 0) {
 										const model = modelData[0] as any;
-										const promptPrice = Number(model.pricing_prompt) || 0;
-										const completionPrice = Number(model.pricing_completion) || 0;
+										promptPrice = Number(model.pricing_prompt) || 0;
+										completionPrice = Number(model.pricing_completion) || 0;
+									} else {
+										// If not in database, try to fetch from API
+										try {
+											console.log(`Fetching model details from API for ${modelId}`);
+											const modelDetails = await client.getModelDetails(modelId);
+											if (modelDetails?.pricing) {
+												promptPrice = Number(modelDetails.pricing.prompt) || 0;
+												completionPrice = Number(modelDetails.pricing.completion) || 0;
 
+												// Save to database for future use
+												await db.run(
+													`INSERT OR REPLACE INTO models (id, name, pricing_prompt, pricing_completion, updated_at) 
+													 VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+													[modelId, modelDetails.name || modelId, promptPrice, completionPrice]
+												);
+											}
+										} catch (error) {
+											console.error(`Failed to fetch model details for ${modelId}:`, error);
+										}
+									}
+
+									if (promptPrice > 0 || completionPrice > 0) {
 										// Calculate estimated cost
 										const estimatedCost =
 											estimatedPromptTokens * promptPrice +
@@ -501,6 +543,25 @@ export const POST: RequestHandler = async ({ request }) => {
 									} else {
 										console.warn(
 											`No pricing data available for model ${modelId}, cannot estimate cost`
+										);
+										// Still update token counts even without pricing
+										await db.run(
+											`
+											UPDATE model_responses 
+											SET 
+												prompt_tokens = ?,
+												completion_tokens = ?,
+												total_tokens = ?,
+												tokens_per_second = ?
+											WHERE id = ?
+											`,
+											[
+												estimatedPromptTokens,
+												estimatedCompletionTokens,
+												estimatedPromptTokens + estimatedCompletionTokens,
+												estimatedCompletionTokens / (latencyMs / 1000),
+												responseId
+											]
 										);
 									}
 								}

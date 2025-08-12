@@ -142,7 +142,27 @@ class OpenRouterClient {
 		}
 
 		const result = await response.json();
-		return result.data;
+
+		// Parse the response based on OpenRouter's actual format
+		// The API returns data at the root level, not nested under 'data'
+		const data = result.data || result;
+
+		// Convert the response format to our expected format
+		return {
+			latency: data.latency,
+			generation_time: data.generation_time,
+			moderation_latency: data.moderation_latency,
+			usage: {
+				// Use native tokens which are the actual tokens used
+				prompt_tokens: data.native_tokens_prompt || data.tokens_prompt,
+				completion_tokens: data.native_tokens_completion || data.tokens_completion,
+				total_tokens:
+					(data.native_tokens_prompt || data.tokens_prompt || 0) +
+					(data.native_tokens_completion || data.tokens_completion || 0),
+				// The 'usage' field in the response is the cost
+				cost: data.usage
+			}
+		};
 	}
 
 	calculateCost(model: OpenRouterModel, promptTokens: number, completionTokens: number): number {

@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { getOpenRouterClient } from '$lib/server/openrouter/client';
 import { SimplifiedDBClient } from '$lib/server/db/client';
 import type { BenchmarkConfig } from '$lib/types/benchmark';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -259,6 +260,23 @@ async function processModels(
 			const latencyMs = Date.now() - startTime;
 			const generationId = response.id || null;
 
+			// Log the raw response for debugging (only if debug mode is enabled)
+			if (env.DEBUG_API_RESPONSES === 'true') {
+				const responseLog = {
+					...response,
+					choices: response.choices?.map((c: any) => ({
+						...c,
+						message: {
+							...c.message,
+							content: c.message?.content
+								? `[content: ${typeof c.message.content === 'string' ? c.message.content.substring(0, 100) + '...' : 'structured'}]`
+								: undefined
+						}
+					}))
+				};
+				console.log(`Raw API response for model ${modelId}:`, JSON.stringify(responseLog, null, 2));
+			}
+
 			// Check if we got usage data
 			let promptTokens = response.usage?.prompt_tokens || 0;
 			let completionTokens = response.usage?.completion_tokens || 0;
@@ -268,7 +286,7 @@ async function processModels(
 			// Log if we received usage data
 			if (promptTokens || completionTokens) {
 				console.log(
-					`Received usage data for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
+					`Processed usage data for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
 				);
 			}
 
@@ -282,6 +300,14 @@ async function processModels(
 					await new Promise((resolve) => setTimeout(resolve, 1000));
 					const generation = await client.getGeneration(generationId);
 
+					// Log the raw generation response for debugging (only if debug mode is enabled)
+					if (env.DEBUG_API_RESPONSES === 'true') {
+						console.log(
+							`Raw Generation API response for ${modelId}:`,
+							JSON.stringify(generation, null, 2)
+						);
+					}
+
 					if (generation && typeof generation === 'object' && 'usage' in generation) {
 						const genUsage = generation.usage as any;
 						if (genUsage?.prompt_tokens || genUsage?.completion_tokens) {
@@ -290,7 +316,7 @@ async function processModels(
 							totalTokens = genUsage.total_tokens || promptTokens + completionTokens;
 							cost = genUsage.cost || 0;
 							console.log(
-								`Successfully retrieved usage data from Generation API for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
+								`Successfully processed usage data from Generation API for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
 							);
 						}
 					}
