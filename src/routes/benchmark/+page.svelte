@@ -216,11 +216,17 @@
 		try {
 			// Process files for vision and document benchmarks
 			let imageData: string | undefined;
-			let documentData: { dataUrl: string; fileType: 'pdf' | 'image'; fileName?: string } | undefined;
-			
-			if ((config.benchmarkType === 'vision' || config.benchmarkType === 'document') && config.files && config.files.length > 0) {
+			let documentData:
+				| { dataUrl: string; fileType: 'pdf' | 'image'; fileName?: string }
+				| undefined;
+
+			if (
+				(config.benchmarkType === 'vision' || config.benchmarkType === 'document') &&
+				config.files &&
+				config.files.length > 0
+			) {
 				const file = config.files[0]; // Use the first file
-				
+
 				// Convert file to base64 data URL
 				const reader = new FileReader();
 				const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -228,7 +234,7 @@
 					reader.onerror = reject;
 					reader.readAsDataURL(file);
 				});
-				
+
 				// Determine file type and set appropriate data
 				if (file.type === 'application/pdf') {
 					documentData = {

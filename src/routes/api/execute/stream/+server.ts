@@ -232,12 +232,23 @@ export const POST: RequestHandler = async ({ request }) => {
 						let fullResponse = '';
 						let firstTokenTime: number | null = null;
 						let generationId: string | null = null;
+						let usageReceived = false;
 						const reader = streamResponse.getReader();
 						const decoder = new TextDecoder();
+						const USAGE_DATA_TIMEOUT = 1000; // 1 second extra wait for usage data
 
 						while (true) {
 							const { done, value } = await reader.read();
-							if (done) break;
+							if (done) {
+								// Wait a bit longer for usage data if we haven't received it
+								if (!usageReceived && generationId) {
+									console.log(
+										`Waiting ${USAGE_DATA_TIMEOUT}ms for usage data from model ${modelId}`
+									);
+									await new Promise((resolve) => setTimeout(resolve, USAGE_DATA_TIMEOUT));
+								}
+								break;
+							}
 
 							const chunk = decoder.decode(value);
 							const lines = chunk.split('\n');
@@ -275,6 +286,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 										// Check for usage data in the stream (OpenRouter sends it at the end)
 										if (parsed.usage) {
+											usageReceived = true;
 											const currentTime = Date.now() - startTime;
 											// Calculate actual cost from usage data
 											// Handle scientific notation and ensure it's a valid number
@@ -313,6 +325,10 @@ export const POST: RequestHandler = async ({ request }) => {
 												]
 											);
 
+											console.log(
+												`Received usage data for model ${modelId}: ${parsed.usage.prompt_tokens} prompt, ${parsed.usage.completion_tokens} completion tokens, cost: $${actualCost}`
+											);
+
 											// Send immediate cost update
 											sendMessage('cost_update', {
 												modelId,
@@ -320,11 +336,12 @@ export const POST: RequestHandler = async ({ request }) => {
 												cost: actualCost,
 												tokensPerSecond,
 												usage: {
-													prompt_tokens: parsed.usage.prompt_tokens,
-													completion_tokens: parsed.usage.completion_tokens,
+													prompt_tokens: parsed.usage.prompt_tokens || 0,
+													completion_tokens: parsed.usage.completion_tokens || 0,
 													total_tokens:
 														parsed.usage.total_tokens ||
-														parsed.usage.prompt_tokens + parsed.usage.completion_tokens
+														(parsed.usage.prompt_tokens || 0) +
+															(parsed.usage.completion_tokens || 0)
 												}
 											});
 										}
@@ -337,6 +354,158 @@ export const POST: RequestHandler = async ({ request }) => {
 
 						// After streaming completes
 						const latencyMs = Date.now() - startTime;
+
+						// Check if we need to estimate usage (if no usage data was received)
+						const existingUsage = await db.all(
+							`SELECT prompt_tokens, completion_tokens, cost FROM model_responses WHERE id = ?`,
+							[responseId]
+						);
+
+						if (existingUsage.length > 0) {
+							const usage = existingUsage[0] as any;
+							if (!usage.prompt_tokens && !usage.completion_tokens && !usage.cost) {
+								// First, try to get usage from Generation API if we have a generation ID
+								let usageFromGeneration = false;
+								if (generationId && !usageReceived) {
+									try {
+										console.log(
+											`Attempting to fetch usage data via Generation API for model ${modelId}, generation ID: ${generationId}`
+										);
+										const generation = await client.getGeneration(generationId);
+
+										// Check if we got usage data from the generation endpoint
+										if (generation && typeof generation === 'object' && 'usage' in generation) {
+											const genUsage = generation.usage as any;
+											if (genUsage?.prompt_tokens || genUsage?.completion_tokens) {
+												const genCost = genUsage.cost || 0;
+												await db.run(
+													`
+													UPDATE model_responses 
+													SET 
+														prompt_tokens = ?,
+														completion_tokens = ?,
+														total_tokens = ?,
+														cost = ?,
+														tokens_per_second = ?
+													WHERE id = ?
+													`,
+													[
+														genUsage.prompt_tokens || 0,
+														genUsage.completion_tokens || 0,
+														genUsage.total_tokens ||
+															(genUsage.prompt_tokens || 0) + (genUsage.completion_tokens || 0),
+														genCost,
+														(genUsage.completion_tokens || 0) / (latencyMs / 1000),
+														responseId
+													]
+												);
+
+												totalCost += genCost;
+												usageFromGeneration = true;
+												console.log(
+													`Successfully retrieved usage data from Generation API for model ${modelId}: ${genUsage.prompt_tokens} prompt, ${genUsage.completion_tokens} completion tokens, cost: $${genCost}`
+												);
+
+												// Send usage update
+												sendMessage('cost_update', {
+													modelId,
+													responseId,
+													cost: genCost,
+													tokensPerSecond: (genUsage.completion_tokens || 0) / (latencyMs / 1000),
+													usage: {
+														prompt_tokens: genUsage.prompt_tokens || 0,
+														completion_tokens: genUsage.completion_tokens || 0,
+														total_tokens:
+															genUsage.total_tokens ||
+															(genUsage.prompt_tokens || 0) + (genUsage.completion_tokens || 0)
+													}
+												});
+											}
+										}
+									} catch (error) {
+										console.log(
+											`Failed to fetch usage from Generation API for model ${modelId}:`,
+											error
+										);
+									}
+								}
+
+								// If still no usage data, estimate it
+								if (!usageFromGeneration) {
+									// Estimate token counts if we didn't get usage data
+									// Rough estimation: ~4 characters per token
+									const estimatedPromptTokens = Math.ceil((config.userPrompt?.length || 0) / 4);
+									const estimatedCompletionTokens = Math.ceil(fullResponse.length / 4);
+
+									console.log(
+										`Using estimated usage for model ${modelId}: ${estimatedPromptTokens} prompt, ${estimatedCompletionTokens} completion tokens (no usage data received)`
+									);
+
+									// Try to get model pricing from database
+									const modelData = await db.all(
+										`SELECT pricing_prompt, pricing_completion FROM models WHERE id = ?`,
+										[modelId]
+									);
+
+									if (modelData.length > 0) {
+										const model = modelData[0] as any;
+										const promptPrice = Number(model.pricing_prompt) || 0;
+										const completionPrice = Number(model.pricing_completion) || 0;
+
+										// Calculate estimated cost
+										const estimatedCost =
+											estimatedPromptTokens * promptPrice +
+											estimatedCompletionTokens * completionPrice;
+
+										console.log(
+											`Estimated cost for model ${modelId}: $${estimatedCost.toFixed(8)} (prompt: $${promptPrice}/token, completion: $${completionPrice}/token)`
+										);
+
+										// Update with estimated values
+										await db.run(
+											`
+											UPDATE model_responses 
+											SET 
+												prompt_tokens = ?,
+												completion_tokens = ?,
+												total_tokens = ?,
+												cost = ?,
+												tokens_per_second = ?
+											WHERE id = ?
+											`,
+											[
+												estimatedPromptTokens,
+												estimatedCompletionTokens,
+												estimatedPromptTokens + estimatedCompletionTokens,
+												estimatedCost,
+												estimatedCompletionTokens / (latencyMs / 1000),
+												responseId
+											]
+										);
+
+										totalCost += estimatedCost;
+
+										// Send estimated usage update
+										sendMessage('cost_update', {
+											modelId,
+											responseId,
+											cost: estimatedCost,
+											tokensPerSecond: estimatedCompletionTokens / (latencyMs / 1000),
+											usage: {
+												prompt_tokens: estimatedPromptTokens,
+												completion_tokens: estimatedCompletionTokens,
+												total_tokens: estimatedPromptTokens + estimatedCompletionTokens
+											},
+											estimated: true
+										});
+									} else {
+										console.warn(
+											`No pricing data available for model ${modelId}, cannot estimate cost`
+										);
+									}
+								}
+							}
+						}
 
 						// Check if response is empty
 						if (!fullResponse || fullResponse.trim() === '') {

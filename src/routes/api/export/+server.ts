@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		const db = await getDB();
-		
+
 		// Get the specific benchmark run with aggregated cost
 		const runQuery = `
 			SELECT 
@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		`;
 
 		const runs = await db.query(runQuery, [runId]);
-		
+
 		if (runs.length === 0) {
 			throw error(404, 'Benchmark run not found');
 		}
@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			WHERE mr.run_id = ?
 			ORDER BY mr.created_at DESC
 		`;
-		
+
 		const responses = await db.query(responsesQuery, [runId]);
 
 		const exportData = {
@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		let content: string | Blob;
 		let mimeType: string;
-		
+
 		switch (format as ExportFormat) {
 			case 'csv':
 				content = exportToCSV(exportData);

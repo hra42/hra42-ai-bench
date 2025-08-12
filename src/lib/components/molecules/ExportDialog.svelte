@@ -32,35 +32,34 @@
 {#if isOpen}
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<button
-			class="absolute inset-0 bg-black bg-opacity-50"
+			class="bg-opacity-50 absolute inset-0 bg-black"
 			on:click={handleClose}
 			aria-label="Close dialog"
 		/>
-		
+
 		<div class="relative w-full max-w-md">
 			<Card>
 				<div class="p-6">
 					<h2 class="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
 						{title}
 					</h2>
-					
+
 					<p class="mb-6 text-sm text-slate-600 dark:text-slate-400">
 						{description}
 					</p>
 
 					<div class="mb-6 space-y-4">
 						<div>
-							<label for="format" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+							<label
+								for="format"
+								class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+							>
 								Export Format
 							</label>
-							<Select
-								id="format"
-								bind:value={selectedFormat}
-								options={formatOptions}
-							/>
+							<Select id="format" bind:value={selectedFormat} options={formatOptions} />
 						</div>
 
-						<div class="rounded-lg bg-slate-50 dark:bg-slate-800 p-4">
+						<div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
 							<h3 class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
 								Format Details
 							</h3>
@@ -81,18 +80,8 @@
 					</div>
 
 					<div class="flex justify-end gap-3">
-						<Button
-							variant="secondary"
-							on:click={handleClose}
-							disabled={loading}
-						>
-							Cancel
-						</Button>
-						<Button
-							variant="primary"
-							on:click={handleExport}
-							disabled={loading}
-						>
+						<Button variant="secondary" on:click={handleClose} disabled={loading}>Cancel</Button>
+						<Button variant="primary" on:click={handleExport} disabled={loading}>
 							{#if loading}
 								Exporting...
 							{:else}

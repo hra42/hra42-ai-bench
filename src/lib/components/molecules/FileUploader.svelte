@@ -143,7 +143,9 @@
 							</div>
 						{:else if file.type === 'application/pdf'}
 							<!-- PDF file icon -->
-							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900">
+							<div
+								class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900"
+							>
 								<svg
 									class="h-6 w-6 text-red-600 dark:text-red-400"
 									fill="none"

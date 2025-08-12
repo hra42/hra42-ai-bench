@@ -169,36 +169,42 @@ npm run test
 ### Types of Contributions
 
 #### 🐛 Bug Fixes
+
 - Identify and fix bugs
 - Improve error handling
 - Fix edge cases
 - Enhance stability
 
 #### ✨ Features
+
 - Implement new benchmark types
 - Add model integrations
 - Create UI components
 - Develop API endpoints
 
 #### 📚 Documentation
+
 - Improve existing docs
 - Add code examples
 - Create tutorials
 - Update API documentation
 
 #### 🎨 UI/UX Improvements
+
 - Enhance visual design
 - Improve accessibility
 - Optimize responsive layouts
 - Refine user workflows
 
 #### ⚡ Performance
+
 - Optimize queries
 - Improve load times
 - Reduce bundle size
 - Enhance caching
 
 #### 🧪 Testing
+
 - Write unit tests
 - Add integration tests
 - Create E2E tests
@@ -207,18 +213,21 @@ npm run test
 ### Contribution Ideas
 
 #### Small Contributions
+
 - Fix typos in documentation
 - Add missing TypeScript types
 - Improve error messages
 - Add loading states
 
 #### Medium Contributions
+
 - Create new UI components
 - Add export formats
 - Implement keyboard shortcuts
 - Enhance mobile experience
 
 #### Large Contributions
+
 - Add new benchmark types
 - Integrate new model providers
 - Implement plugin system
@@ -264,6 +273,7 @@ Fixes #123
 ```
 
 #### Types
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -327,39 +337,39 @@ Fixes #67"
 ```typescript
 // Use explicit types
 interface BenchmarkConfig {
-  type: BenchmarkType;
-  models: string[];
-  prompt: string;
-  config?: ModelConfig;
+	type: BenchmarkType;
+	models: string[];
+	prompt: string;
+	config?: ModelConfig;
 }
 
 // Avoid any type
 // ❌ Bad
-function process(data: any) { }
+function process(data: any) {}
 
 // ✅ Good
-function process(data: BenchmarkResult) { }
+function process(data: BenchmarkResult) {}
 
 // Use enums for constants
 enum BenchmarkStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed'
+	PENDING = 'pending',
+	RUNNING = 'running',
+	COMPLETED = 'completed',
+	FAILED = 'failed'
 }
 
 // Prefer interfaces over types for objects
 // ✅ Good
 interface User {
-  id: string;
-  name: string;
+	id: string;
+	name: string;
 }
 
 // Use async/await over promises
 // ✅ Good
 async function fetchData() {
-  const result = await api.get('/data');
-  return result;
+	const result = await api.get('/data');
+	return result;
 }
 ```
 
@@ -368,42 +378,42 @@ async function fetchData() {
 ```svelte
 <!-- Component structure -->
 <script lang="ts">
-  // 1. Imports
-  import { onMount } from 'svelte';
-  import Button from '$lib/components/atoms/Button.svelte';
-  
-  // 2. Props
-  export let title: string;
-  export let variant: 'primary' | 'secondary' = 'primary';
-  
-  // 3. State
-  let isLoading = false;
-  let data: any[] = [];
-  
-  // 4. Computed
-  $: itemCount = data.length;
-  
-  // 5. Functions
-  async function loadData() {
-    isLoading = true;
-    // Implementation
-    isLoading = false;
-  }
-  
-  // 6. Lifecycle
-  onMount(() => {
-    loadData();
-  });
+	// 1. Imports
+	import { onMount } from 'svelte';
+	import Button from '$lib/components/atoms/Button.svelte';
+
+	// 2. Props
+	export let title: string;
+	export let variant: 'primary' | 'secondary' = 'primary';
+
+	// 3. State
+	let isLoading = false;
+	let data: any[] = [];
+
+	// 4. Computed
+	$: itemCount = data.length;
+
+	// 5. Functions
+	async function loadData() {
+		isLoading = true;
+		// Implementation
+		isLoading = false;
+	}
+
+	// 6. Lifecycle
+	onMount(() => {
+		loadData();
+	});
 </script>
 
 <!-- Template -->
 <div class="container">
-  {#if isLoading}
-    <Spinner />
-  {:else}
-    <h1>{title}</h1>
-    <!-- Content -->
-  {/if}
+	{#if isLoading}
+		<Spinner />
+	{:else}
+		<h1>{title}</h1>
+		<!-- Content -->
+	{/if}
 </div>
 
 <!-- No custom styles - use Tailwind only -->
@@ -425,8 +435,8 @@ async function fetchData() {
 <!-- Component variants -->
 <button class="
   px-4 py-2 rounded-lg transition-colors
-  {variant === 'primary' 
-    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+  {variant === 'primary'
+    ? 'bg-blue-600 text-white hover:bg-blue-700'
     : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}
 ">
 
@@ -468,17 +478,17 @@ import { describe, it, expect } from 'vitest';
 import { formatCost } from '$lib/utils/format';
 
 describe('formatCost', () => {
-  it('should format cost with 4 decimal places', () => {
-    expect(formatCost(0.0025)).toBe('$0.0025');
-  });
-  
-  it('should handle zero cost', () => {
-    expect(formatCost(0)).toBe('$0.0000');
-  });
-  
-  it('should handle large costs', () => {
-    expect(formatCost(123.456789)).toBe('$123.4568');
-  });
+	it('should format cost with 4 decimal places', () => {
+		expect(formatCost(0.0025)).toBe('$0.0025');
+	});
+
+	it('should handle zero cost', () => {
+		expect(formatCost(0)).toBe('$0.0000');
+	});
+
+	it('should handle large costs', () => {
+		expect(formatCost(123.456789)).toBe('$123.4568');
+	});
 });
 ```
 
@@ -490,24 +500,24 @@ import { render, fireEvent } from '@testing-library/svelte';
 import Button from '$lib/components/atoms/Button.svelte';
 
 describe('Button Component', () => {
-  it('should render with text', () => {
-    const { getByText } = render(Button, {
-      props: { text: 'Click me' }
-    });
-    
-    expect(getByText('Click me')).toBeInTheDocument();
-  });
-  
-  it('should handle click events', async () => {
-    const { component, getByRole } = render(Button);
-    const button = getByRole('button');
-    
-    let clicked = false;
-    component.$on('click', () => clicked = true);
-    
-    await fireEvent.click(button);
-    expect(clicked).toBe(true);
-  });
+	it('should render with text', () => {
+		const { getByText } = render(Button, {
+			props: { text: 'Click me' }
+		});
+
+		expect(getByText('Click me')).toBeInTheDocument();
+	});
+
+	it('should handle click events', async () => {
+		const { component, getByRole } = render(Button);
+		const button = getByRole('button');
+
+		let clicked = false;
+		component.$on('click', () => (clicked = true));
+
+		await fireEvent.click(button);
+		expect(clicked).toBe(true);
+	});
 });
 ```
 
@@ -518,14 +528,14 @@ describe('Button Component', () => {
 import { describe, it, expect } from 'vitest';
 
 describe('API: /api/models', () => {
-  it('should return list of models', async () => {
-    const response = await fetch('/api/models');
-    const data = await response.json();
-    
-    expect(response.status).toBe(200);
-    expect(data.models).toBeInstanceOf(Array);
-    expect(data.models.length).toBeGreaterThan(0);
-  });
+	it('should return list of models', async () => {
+		const response = await fetch('/api/models');
+		const data = await response.json();
+
+		expect(response.status).toBe(200);
+		expect(data.models).toBeInstanceOf(Array);
+		expect(data.models.length).toBeGreaterThan(0);
+	});
 });
 ```
 
@@ -557,10 +567,10 @@ describe('API: /api/models', () => {
  * );
  */
 export async function executeBenchmark(
-  config: BenchmarkConfig,
-  models: string[]
+	config: BenchmarkConfig,
+	models: string[]
 ): Promise<BenchmarkResult> {
-  // Implementation
+	// Implementation
 }
 ```
 
@@ -582,14 +592,17 @@ Update `CHANGELOG.md` for significant changes:
 ## [Unreleased]
 
 ### Added
+
 - CSV export functionality for benchmark results (#45)
 - Keyboard shortcuts for common actions
 
 ### Fixed
+
 - Rate limit handling in OpenRouter client (#67)
 - Memory leak in streaming responses
 
 ### Changed
+
 - Improved error messages for better debugging
 - Updated model selection UI for better UX
 ```
@@ -599,12 +612,14 @@ Update `CHANGELOG.md` for significant changes:
 ### Before Submitting
 
 1. **Update from upstream**
+
 ```bash
 git fetch upstream
 git rebase upstream/main
 ```
 
 2. **Run quality checks**
+
 ```bash
 npm run check
 npm run lint
@@ -613,6 +628,7 @@ npm run build
 ```
 
 3. **Update documentation**
+
 - Add/update relevant docs
 - Update changelog
 - Add code comments
@@ -621,28 +637,34 @@ npm run build
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Changes Made
+
 - List specific changes
 - Include reasoning
 - Note any decisions made
 
 ## Testing
+
 - [ ] Unit tests pass
 - [ ] Manual testing completed
 - [ ] No regressions found
 
 ## Screenshots
+
 (If UI changes)
 
 ## Checklist
+
 - [ ] Code follows style guidelines
 - [ ] Self-review completed
 - [ ] Documentation updated
@@ -683,18 +705,21 @@ Fixes #(issue number)
 ### Communication Channels
 
 #### GitHub Discussions
+
 - General questions
 - Feature requests
 - Ideas and feedback
 - Community support
 
 #### Discord Server
+
 - Real-time chat
 - Quick questions
 - Collaboration
 - Community events
 
 #### GitHub Issues
+
 - Bug reports
 - Feature tracking
 - Task assignment
@@ -703,12 +728,14 @@ Fixes #(issue number)
 ### Getting Help
 
 #### For Questions
+
 1. Check existing documentation
 2. Search GitHub issues
 3. Ask in Discussions
 4. Join Discord for chat
 
 #### For Problems
+
 1. Search for similar issues
 2. Create detailed bug report
 3. Include reproduction steps

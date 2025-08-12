@@ -15,8 +15,4 @@
 	}
 </script>
 
-<HistoryView
-	benchmarks={data.benchmarks}
-	on:navigate={handleNavigate}
-	on:view={handleView}
-/>
+<HistoryView benchmarks={data.benchmarks} on:navigate={handleNavigate} on:view={handleView} />

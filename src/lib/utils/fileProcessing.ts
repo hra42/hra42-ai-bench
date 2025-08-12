@@ -120,8 +120,6 @@ export async function processDocumentForApi(file: File): Promise<{
 		const result = await processPDFForApi(file);
 		return { ...result, fileType: 'pdf' };
 	} else {
-		throw new Error(
-			`Invalid file type: ${file.type}. Accepted types: JPEG, PNG, WebP, GIF, PDF`
-		);
+		throw new Error(`Invalid file type: ${file.type}. Accepted types: JPEG, PNG, WebP, GIF, PDF`);
 	}
 }

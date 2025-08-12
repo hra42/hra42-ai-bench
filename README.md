@@ -37,29 +37,33 @@ HRA42 AI Bench is a comprehensive benchmarking platform for comparing Large Lang
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or pnpm
 - OpenRouter API key ([Get one here](https://openrouter.ai))
 
 ### Setup
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/hra42/hra42-ai-bench.git
 cd hra42-ai-bench
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Configure environment variables**
+
 ```bash
 cp .env.example .env
 ```
 
 Edit `.env` and add your OpenRouter API key:
+
 ```env
 OPENROUTER_API_KEY=your-api-key-here
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
@@ -67,11 +71,13 @@ DATABASE_PATH=data/hra42.duckdb
 ```
 
 4. **Initialize the database**
+
 ```bash
 npm run db:init
 ```
 
 5. **Start the development server**
+
 ```bash
 npm run dev
 ```
@@ -83,18 +89,21 @@ Visit [http://localhost:5173](http://localhost:5173) to access the application.
 ### Quick Start with Docker Compose
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/hra42/hra42-ai-bench.git
 cd hra42-ai-bench
 ```
 
 2. **Configure environment**
+
 ```bash
 cp .env.example .env
 # Edit .env and add your OpenRouter API key
 ```
 
 3. **Build and run with Docker Compose**
+
 ```bash
 docker compose up -d --build
 ```
@@ -155,12 +164,12 @@ Access the development server at [http://localhost:5173](http://localhost:5173)
 ```typescript
 // Example prompt configuration
 const benchmark = {
-  type: 'text',
-  prompt: 'Explain quantum computing in simple terms',
-  models: ['gpt-4', 'claude-3-opus', 'gemini-pro'],
-  temperature: 0.7,
-  maxTokens: 500
-}
+	type: 'text',
+	prompt: 'Explain quantum computing in simple terms',
+	models: ['gpt-4', 'claude-3-opus', 'gemini-pro'],
+	temperature: 0.7,
+	maxTokens: 500
+};
 ```
 
 ## 🎯 Features
@@ -168,34 +177,42 @@ const benchmark = {
 ### Benchmark Types
 
 #### 📝 Text Generation
+
 Compare how different models respond to the same prompt with detailed token usage and cost analysis.
 
 #### 🔧 Structured Output
+
 Test models' ability to generate valid JSON according to specified schemas.
 
 #### 🛠️ Function Calling
+
 Evaluate how well models understand and execute function definitions.
 
 #### 🖼️ Vision Analysis
+
 Compare image understanding capabilities across vision-enabled models.
 
 #### 📄 Document Processing
+
 Test PDF processing and document understanding abilities.
 
 ### Advanced Features
 
 #### 🔄 Real-Time Streaming
+
 - Server-Sent Events for live updates
 - Progressive response rendering
 - Concurrent model execution
 
 #### 📊 Analytics Dashboard
+
 - Cost per token analysis
 - Response time comparison
 - Quality metrics tracking
 - Historical trend analysis
 
 #### 💾 Data Management
+
 - Export results to CSV/JSON
 - Save benchmark templates
 - Historical data browsing
@@ -205,14 +222,14 @@ Test PDF processing and document understanding abilities.
 
 ### Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Frontend | SvelteKit | Full-stack framework |
-| Styling | Tailwind CSS v4 | Utility-first CSS |
-| Database | DuckDB | Embedded analytics |
-| API | OpenRouter | Unified LLM access |
-| Language | TypeScript | Type safety |
-| State | Svelte Stores | Reactive state management |
+| Layer    | Technology      | Purpose                   |
+| -------- | --------------- | ------------------------- |
+| Frontend | SvelteKit       | Full-stack framework      |
+| Styling  | Tailwind CSS v4 | Utility-first CSS         |
+| Database | DuckDB          | Embedded analytics        |
+| API      | OpenRouter      | Unified LLM access        |
+| Language | TypeScript      | Type safety               |
+| State    | Svelte Stores   | Reactive state management |
 
 ### Project Structure
 
@@ -283,51 +300,59 @@ CREATE TABLE models (
 ### Core Endpoints
 
 #### `GET /api/models`
+
 Fetch available models from OpenRouter.
 
 **Response:**
+
 ```json
 {
-  "models": [
-    {
-      "id": "openai/gpt-4",
-      "name": "GPT-4",
-      "contextLength": 8192,
-      "pricing": {
-        "prompt": 0.03,
-        "completion": 0.06
-      }
-    }
-  ]
+	"models": [
+		{
+			"id": "openai/gpt-4",
+			"name": "GPT-4",
+			"contextLength": 8192,
+			"pricing": {
+				"prompt": 0.03,
+				"completion": 0.06
+			}
+		}
+	]
 }
 ```
 
 #### `POST /api/execute`
+
 Execute a benchmark run.
 
 **Request:**
+
 ```json
 {
-  "type": "text",
-  "models": ["gpt-4", "claude-3"],
-  "prompt": "Your prompt here",
-  "config": {
-    "temperature": 0.7,
-    "maxTokens": 500
-  }
+	"type": "text",
+	"models": ["gpt-4", "claude-3"],
+	"prompt": "Your prompt here",
+	"config": {
+		"temperature": 0.7,
+		"maxTokens": 500
+	}
 }
 ```
 
 #### `GET /api/execute/stream`
+
 Stream benchmark execution results via Server-Sent Events.
 
 #### `GET /api/results/:runId`
+
 Fetch results for a specific benchmark run.
 
 #### `GET /api/history`
+
 Retrieve historical benchmark data with filtering options.
 
 #### `POST /api/export`
+
 Export benchmark results in various formats (CSV, JSON, Excel).
 
 ## 📖 User Guide
@@ -335,6 +360,7 @@ Export benchmark results in various formats (CSV, JSON, Excel).
 ### Workflow Examples
 
 #### Comparing Model Creativity
+
 1. Select "Text Generation" benchmark type
 2. Choose creative writing models
 3. Set temperature to 0.9 for more creative outputs
@@ -342,12 +368,14 @@ Export benchmark results in various formats (CSV, JSON, Excel).
 5. Compare responses for originality and coherence
 
 #### Testing JSON Generation
+
 1. Select "Structured Output" benchmark
 2. Define your JSON schema
 3. Choose models with JSON mode support
 4. Execute and validate schema compliance
 
 #### Analyzing Images
+
 1. Select "Vision Analysis" benchmark
 2. Upload image (JPEG, PNG, WebP)
 3. Choose vision-capable models
@@ -389,13 +417,13 @@ npm run test:ui    # Run tests with UI
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OPENROUTER_API_KEY` | OpenRouter API key | Required |
-| `OPENROUTER_BASE_URL` | API base URL | `https://openrouter.ai/api/v1` |
-| `DATABASE_PATH` | DuckDB file location | `data/hra42.duckdb` |
-| `PUBLIC_APP_NAME` | Application name | `HRA42 AI Bench` |
-| `PUBLIC_MAX_FILE_SIZE` | Max upload size | `20971520` (20MB) |
+| Variable               | Description          | Default                        |
+| ---------------------- | -------------------- | ------------------------------ |
+| `OPENROUTER_API_KEY`   | OpenRouter API key   | Required                       |
+| `OPENROUTER_BASE_URL`  | API base URL         | `https://openrouter.ai/api/v1` |
+| `DATABASE_PATH`        | DuckDB file location | `data/hra42.duckdb`            |
+| `PUBLIC_APP_NAME`      | Application name     | `HRA42 AI Bench`               |
+| `PUBLIC_MAX_FILE_SIZE` | Max upload size      | `20971520` (20MB)              |
 
 ### Component Development
 
@@ -404,17 +432,17 @@ All components follow atomic design principles:
 ```svelte
 <!-- Example: atoms/Button.svelte -->
 <script lang="ts">
-  export let variant: 'primary' | 'secondary' = 'primary';
-  export let size: 'sm' | 'md' | 'lg' = 'md';
+	export let variant: 'primary' | 'secondary' = 'primary';
+	export let size: 'sm' | 'md' | 'lg' = 'md';
 </script>
 
 <button
-  class="px-4 py-2 rounded-lg transition-colors
+	class="rounded-lg px-4 py-2 transition-colors
          {variant === 'primary' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
          {size === 'sm' ? 'text-sm' : ''}"
-  on:click
+	on:click
 >
-  <slot />
+	<slot />
 </button>
 ```
 
@@ -454,6 +482,7 @@ All components follow atomic design principles:
 This project is released into the public domain under the **Unlicense** - see the [LICENSE](LICENSE) file for details.
 
 This means you can:
+
 - ✅ Use this software for any purpose
 - ✅ Modify and distribute it freely
 - ✅ Use it in commercial projects

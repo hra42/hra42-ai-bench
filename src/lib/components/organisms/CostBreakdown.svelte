@@ -57,6 +57,9 @@
 						<p class="text-xs text-slate-500 dark:text-slate-400">
 							{model.inputTokens.toLocaleString()} input • {model.outputTokens.toLocaleString()} output
 							tokens
+							{#if model.inputTokens === 0 && model.outputTokens === 0}
+								<span class="ml-1 text-amber-500">(no usage data)</span>
+							{/if}
 						</p>
 					</div>
 

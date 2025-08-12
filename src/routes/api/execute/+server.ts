@@ -257,9 +257,61 @@ async function processModels(
 			const response = await client.chat(chatRequest);
 
 			const latencyMs = Date.now() - startTime;
+			const generationId = response.id || null;
+
+			// Check if we got usage data
+			let promptTokens = response.usage?.prompt_tokens || 0;
+			let completionTokens = response.usage?.completion_tokens || 0;
+			let totalTokens = response.usage?.total_tokens || 0;
+			let cost = response.usage?.cost || 0;
+
+			// Log if we received usage data
+			if (promptTokens || completionTokens) {
+				console.log(
+					`Received usage data for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
+				);
+			}
+
+			// If no usage data, try Generation API first
+			if (!promptTokens && !completionTokens && generationId) {
+				try {
+					console.log(
+						`No usage data in response, attempting to fetch via Generation API for model ${modelId}, generation ID: ${generationId}`
+					);
+					// Wait a bit for the generation to be processed
+					await new Promise((resolve) => setTimeout(resolve, 1000));
+					const generation = await client.getGeneration(generationId);
+
+					if (generation && typeof generation === 'object' && 'usage' in generation) {
+						const genUsage = generation.usage as any;
+						if (genUsage?.prompt_tokens || genUsage?.completion_tokens) {
+							promptTokens = genUsage.prompt_tokens || 0;
+							completionTokens = genUsage.completion_tokens || 0;
+							totalTokens = genUsage.total_tokens || promptTokens + completionTokens;
+							cost = genUsage.cost || 0;
+							console.log(
+								`Successfully retrieved usage data from Generation API for model ${modelId}: ${promptTokens} prompt, ${completionTokens} completion tokens, cost: $${cost}`
+							);
+						}
+					}
+				} catch (error) {
+					console.log(`Failed to fetch usage from Generation API for model ${modelId}:`, error);
+				}
+			}
+
+			// If still no usage data, estimate it
+			if (!promptTokens && !completionTokens) {
+				// Estimate token counts: ~4 characters per token
+				promptTokens = Math.ceil((config.userPrompt?.length || 0) / 4);
+				if (config.systemPrompt) {
+					promptTokens += Math.ceil(config.systemPrompt.length / 4);
+				}
+				console.log(
+					`Using estimated prompt tokens for model ${modelId}: ${promptTokens} tokens (no usage data received)`
+				);
+			}
 
 			// OpenRouter returns the cost directly in the response
-			const cost = response.usage?.cost || 0;
 			totalCost += cost;
 
 			// Extract response content and tool calls
@@ -303,6 +355,33 @@ async function processModels(
 				}
 			}
 
+			// If still no completion tokens, estimate from response
+			if (!completionTokens && responseContent) {
+				completionTokens = Math.ceil(responseContent.length / 4);
+				totalTokens = promptTokens + completionTokens;
+				console.log(
+					`Using estimated completion tokens for model ${modelId}: ${completionTokens} tokens (based on response length)`
+				);
+
+				// Try to calculate cost if we have model pricing
+				if (!cost) {
+					try {
+						const modelData = await client.getModelDetails(modelId);
+						if (modelData?.pricing) {
+							const promptPrice = Number(modelData.pricing.prompt) || 0;
+							const completionPrice = Number(modelData.pricing.completion) || 0;
+							cost = promptTokens * promptPrice + completionTokens * completionPrice;
+							totalCost += cost;
+							console.log(
+								`Estimated cost for model ${modelId}: $${cost.toFixed(8)} (prompt: $${promptPrice}/token, completion: $${completionPrice}/token)`
+							);
+						}
+					} catch (e) {
+						console.error('Failed to get model pricing:', e);
+					}
+				}
+			}
+
 			// Update response in database
 			await db.run(
 				`
@@ -325,14 +404,12 @@ async function processModels(
 					responseContent,
 					responseJson,
 					toolCallsJson,
-					response.usage?.prompt_tokens || 0,
-					response.usage?.completion_tokens || 0,
-					response.usage?.total_tokens || 0,
+					promptTokens,
+					completionTokens,
+					totalTokens,
 					cost,
 					latencyMs,
-					response.usage?.completion_tokens
-						? response.usage.completion_tokens / (latencyMs / 1000)
-						: 0,
+					completionTokens ? completionTokens / (latencyMs / 1000) : 0,
 					responseId
 				]
 			);
