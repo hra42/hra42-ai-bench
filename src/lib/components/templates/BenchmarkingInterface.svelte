@@ -6,7 +6,13 @@
 	import ModelComparisonGrid from '../organisms/ModelComparisonGrid.svelte';
 	import CostBreakdown from '../organisms/CostBreakdown.svelte';
 	import ExportDialog from '../molecules/ExportDialog.svelte';
-	import { downloadFile, generateExportFilename, exportToCSV, exportToJSON, type ExportFormat } from '$lib/utils/export';
+	import {
+		downloadFile,
+		generateExportFilename,
+		exportToCSV,
+		exportToJSON,
+		type ExportFormat
+	} from '$lib/utils/export';
 
 	export let availableModels: Array<{ id: string; name: string; provider: string }> = [];
 	export let selectedModels: string[] = [];
@@ -50,7 +56,7 @@
 	export let runId: string | null = null;
 
 	const dispatch = createEventDispatcher();
-	
+
 	let showExportDialog = false;
 	let exportLoading = false;
 
@@ -113,7 +119,7 @@
 						benchmarkType,
 						status: (isRunning ? 'running' : 'completed') as 'running' | 'completed',
 						totalModels: selectedModels.length,
-						completedModels: responses.filter(r => r.status === 'completed').length,
+						completedModels: responses.filter((r) => r.status === 'completed').length,
 						systemPrompt,
 						userPrompt: prompt,
 						maxTokens,
@@ -123,7 +129,7 @@
 						completedAt: isRunning ? undefined : new Date(),
 						createdAt: new Date()
 					},
-					responses: responses.map(r => ({
+					responses: responses.map((r) => ({
 						id: `${r.modelId}_${Date.now()}`,
 						runId: runId || `session_${Date.now()}`,
 						modelId: r.modelId,
@@ -153,7 +159,7 @@
 
 				let content: string;
 				const filename = generateExportFilename(format, benchmarkName || 'benchmark');
-				
+
 				switch (format) {
 					case 'csv':
 						content = exportToCSV(exportData);
@@ -165,7 +171,7 @@
 						break;
 				}
 			}
-			
+
 			showExportDialog = false;
 		} catch (error) {
 			console.error('Export error:', error);
@@ -259,5 +265,5 @@
 	bind:isOpen={showExportDialog}
 	loading={exportLoading}
 	on:export={handleExport}
-	on:close={() => showExportDialog = false}
+	on:close={() => (showExportDialog = false)}
 />

@@ -1,13 +1,15 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: hra42-ai-bench:latest
+    # Use the pre-built image from GitHub Container Registry
+    # To build locally instead, uncomment the build section below
+    image: ghcr.io/hra42/hra42-ai-bench:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     container_name: hra42-ai-bench
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
@@ -23,16 +25,16 @@ services:
       # Persist uploaded files
       - upload_data:/app/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
 volumes:
   duckdb_data:

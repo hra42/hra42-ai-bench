@@ -76,20 +76,18 @@ export function exportToJSON(data: ExportData): string {
 		}
 		return value;
 	};
-	
+
 	return JSON.stringify(data, replacer, 2);
 }
-
 
 export async function downloadFile(
 	content: string | Blob,
 	filename: string,
 	mimeType?: string
 ): Promise<void> {
-	const blob = content instanceof Blob 
-		? content 
-		: new Blob([content], { type: mimeType || 'text/plain' });
-	
+	const blob =
+		content instanceof Blob ? content : new Blob([content], { type: mimeType || 'text/plain' });
+
 	const url = URL.createObjectURL(blob);
 	const link = document.createElement('a');
 	link.href = url;
@@ -100,10 +98,7 @@ export async function downloadFile(
 	URL.revokeObjectURL(url);
 }
 
-export function generateExportFilename(
-	format: ExportFormat,
-	prefix: string = 'benchmark'
-): string {
+export function generateExportFilename(format: ExportFormat, prefix: string = 'benchmark'): string {
 	const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
 	const extensions: Record<ExportFormat, string> = {
 		csv: 'csv',

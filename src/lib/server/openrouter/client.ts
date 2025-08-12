@@ -8,7 +8,7 @@ class OpenRouterClient {
 	private baseUrl: string;
 
 	constructor(
-		apiKey: string = env.OPENROUTER_API_KEY,
+		apiKey: string = env.OPENROUTER_API_KEY || '',
 		baseUrl: string = env.OPENROUTER_BASE_URL || DEFAULT_BASE_URL
 	) {
 		if (!apiKey) {
@@ -121,6 +121,12 @@ class OpenRouterClient {
 		latency?: number;
 		generation_time?: number;
 		moderation_latency?: number;
+		usage?: {
+			prompt_tokens?: number;
+			completion_tokens?: number;
+			total_tokens?: number;
+			cost?: number;
+		};
 	}> {
 		const url = `${this.baseUrl}/generation?id=${generationId}`;
 

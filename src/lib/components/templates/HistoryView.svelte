@@ -53,7 +53,6 @@
 		return matchesSearch && matchesType && matchesStatus;
 	});
 
-
 	function handleNewBenchmark() {
 		dispatch('navigate', { to: '/benchmark' });
 	}

@@ -2,16 +2,19 @@
 
 ## Quick Start
 
-### 1. Build and Run with Docker Compose
+### 1. Using Pre-built Image from GitHub Container Registry (Recommended)
 
 ```bash
+# Pull the latest image
+docker pull ghcr.io/hra42/hra42-ai-bench:latest
+
 # Copy environment variables
 cp .env.example .env
 
 # Edit .env and add your OpenRouter API key
 nano .env
 
-# Build and start the application
+# Start the application using docker-compose
 docker-compose up -d
 
 # View logs
@@ -23,11 +26,11 @@ docker-compose down
 
 The application will be available at `http://localhost:3000`
 
-### 2. Build and Run with Docker
+### 2. Run with Docker (using pre-built image)
 
 ```bash
-# Build the image
-docker build -t hra42-ai-bench .
+# Pull the latest image
+docker pull ghcr.io/hra42/hra42-ai-bench:latest
 
 # Run the container
 docker run -d \
@@ -36,7 +39,7 @@ docker run -d \
   -e OPENROUTER_API_KEY=your-api-key \
   -v hra42_data:/app/data \
   -v hra42_uploads:/app/uploads \
-  hra42-ai-bench
+  ghcr.io/hra42/hra42-ai-bench:latest
 
 # View logs
 docker logs -f hra42-ai-bench
@@ -44,6 +47,22 @@ docker logs -f hra42-ai-bench
 # Stop the container
 docker stop hra42-ai-bench
 docker rm hra42-ai-bench
+```
+
+### 3. Build Locally (for development or customization)
+
+```bash
+# Build the image locally
+docker build -t hra42-ai-bench:local .
+
+# Run the locally built container
+docker run -d \
+  --name hra42-ai-bench \
+  -p 3000:3000 \
+  -e OPENROUTER_API_KEY=your-api-key \
+  -v hra42_data:/app/data \
+  -v hra42_uploads:/app/uploads \
+  hra42-ai-bench:local
 ```
 
 ## Development Setup
@@ -60,9 +79,11 @@ docker-compose -f docker-compose.dev.yml up
 ## Environment Variables
 
 Required:
+
 - `OPENROUTER_API_KEY`: Your OpenRouter API key
 
 Optional:
+
 - `OPENROUTER_BASE_URL`: API base URL (default: https://openrouter.ai/api/v1)
 - `DATABASE_PATH`: Database file path (default: /app/data/hra42.duckdb)
 - `PUBLIC_APP_NAME`: Application name (default: HRA42 AI Bench)
@@ -71,6 +92,7 @@ Optional:
 ## Data Persistence
 
 The following directories are persisted as Docker volumes:
+
 - `/app/data`: DuckDB database files
 - `/app/uploads`: Uploaded files for benchmarks
 
@@ -85,15 +107,18 @@ docker inspect hra42-ai-bench --format='{{.State.Health.Status}}'
 ## Troubleshooting
 
 ### Container won't start
+
 - Check logs: `docker-compose logs app`
 - Verify environment variables are set correctly
 - Ensure port 3000 is not already in use
 
 ### Database errors
+
 - The database is automatically created on first run
 - To reset the database, remove the volume: `docker volume rm hra42-ai-bench_duckdb_data`
 
 ### Permission issues
+
 - The container runs as non-root user (nodejs:1001)
 - Ensure volumes have correct permissions
 
@@ -107,7 +132,16 @@ For production deployment:
 4. Use environment-specific `.env` files
 5. Consider using Docker Swarm or Kubernetes for orchestration
 
-## Building for Different Architectures
+## Available Image Tags
+
+Pre-built images are available on GitHub Container Registry:
+
+- `ghcr.io/hra42/hra42-ai-bench:latest` - Latest stable release
+- `ghcr.io/hra42/hra42-ai-bench:v1.0.0` - Specific version tags
+- `ghcr.io/hra42/hra42-ai-bench:1.0` - Major.minor version tags
+- `ghcr.io/hra42/hra42-ai-bench:1` - Major version tags
+
+## Building for Different Architectures (Local Development)
 
 ```bash
 # Build for ARM64 (Apple Silicon, AWS Graviton)

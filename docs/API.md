@@ -24,36 +24,38 @@ https://your-domain.com/api  # Production
 Fetch all available models from OpenRouter.
 
 **Response:**
+
 ```json
 {
-  "models": [
-    {
-      "id": "openai/gpt-4",
-      "name": "GPT-4",
-      "description": "OpenAI's most capable model",
-      "contextLength": 8192,
-      "pricing": {
-        "prompt": 0.03,
-        "completion": 0.06,
-        "image": 0.01,
-        "request": 0
-      },
-      "topProvider": {
-        "contextLength": 8192,
-        "maxCompletionTokens": 4096,
-        "isModerated": false
-      },
-      "architecture": {
-        "modality": "text",
-        "tokenizer": "GPT",
-        "instructType": "none"
-      }
-    }
-  ]
+	"models": [
+		{
+			"id": "openai/gpt-4",
+			"name": "GPT-4",
+			"description": "OpenAI's most capable model",
+			"contextLength": 8192,
+			"pricing": {
+				"prompt": 0.03,
+				"completion": 0.06,
+				"image": 0.01,
+				"request": 0
+			},
+			"topProvider": {
+				"contextLength": 8192,
+				"maxCompletionTokens": 4096,
+				"isModerated": false
+			},
+			"architecture": {
+				"modality": "text",
+				"tokenizer": "GPT",
+				"instructType": "none"
+			}
+		}
+	]
 }
 ```
 
 **Status Codes:**
+
 - `200 OK` - Success
 - `500 Internal Server Error` - Failed to fetch models
 
@@ -62,23 +64,25 @@ Fetch all available models from OpenRouter.
 Get details for a specific model.
 
 **Parameters:**
+
 - `modelId` (path) - The model identifier (e.g., "openai/gpt-4")
 
 **Response:**
+
 ```json
 {
-  "id": "openai/gpt-4",
-  "name": "GPT-4",
-  "contextLength": 8192,
-  "pricing": {
-    "prompt": 0.03,
-    "completion": 0.06
-  },
-  "capabilities": {
-    "vision": false,
-    "functionCalling": true,
-    "jsonMode": true
-  }
+	"id": "openai/gpt-4",
+	"name": "GPT-4",
+	"contextLength": 8192,
+	"pricing": {
+		"prompt": 0.03,
+		"completion": 0.06
+	},
+	"capabilities": {
+		"vision": false,
+		"functionCalling": true,
+		"jsonMode": true
+	}
 }
 ```
 
@@ -89,39 +93,42 @@ Get details for a specific model.
 Execute a benchmark run across multiple models.
 
 **Request Body:**
+
 ```json
 {
-  "type": "text",
-  "models": ["openai/gpt-4", "anthropic/claude-3-opus"],
-  "prompt": "Explain quantum computing",
-  "systemPrompt": "You are a helpful assistant",
-  "config": {
-    "temperature": 0.7,
-    "maxTokens": 500,
-    "topP": 1.0,
-    "stream": false
-  },
-  "files": [
-    {
-      "type": "image",
-      "data": "base64_encoded_image_data",
-      "mimeType": "image/png"
-    }
-  ]
+	"type": "text",
+	"models": ["openai/gpt-4", "anthropic/claude-3-opus"],
+	"prompt": "Explain quantum computing",
+	"systemPrompt": "You are a helpful assistant",
+	"config": {
+		"temperature": 0.7,
+		"maxTokens": 500,
+		"topP": 1.0,
+		"stream": false
+	},
+	"files": [
+		{
+			"type": "image",
+			"data": "base64_encoded_image_data",
+			"mimeType": "image/png"
+		}
+	]
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "runId": "run_abc123",
-  "status": "pending",
-  "models": ["openai/gpt-4", "anthropic/claude-3-opus"],
-  "createdAt": "2024-01-15T10:30:00Z"
+	"runId": "run_abc123",
+	"status": "pending",
+	"models": ["openai/gpt-4", "anthropic/claude-3-opus"],
+	"createdAt": "2024-01-15T10:30:00Z"
 }
 ```
 
 **Status Codes:**
+
 - `200 OK` - Benchmark initiated successfully
 - `400 Bad Request` - Invalid request parameters
 - `500 Internal Server Error` - Server error
@@ -131,6 +138,7 @@ Execute a benchmark run across multiple models.
 Stream benchmark execution results using Server-Sent Events.
 
 **Query Parameters:**
+
 - `runId` - The benchmark run ID
 - `models` - Comma-separated list of model IDs
 
@@ -170,41 +178,44 @@ data: {"runId": "run_abc123", "status": "completed"}
 Retrieve results for a specific benchmark run.
 
 **Parameters:**
+
 - `runId` (path) - The benchmark run identifier
 
 **Response:**
+
 ```json
 {
-  "run": {
-    "id": "run_abc123",
-    "type": "text",
-    "prompt": "Explain quantum computing",
-    "status": "completed",
-    "createdAt": "2024-01-15T10:30:00Z",
-    "completedAt": "2024-01-15T10:30:15Z"
-  },
-  "responses": [
-    {
-      "id": "resp_def456",
-      "model": "openai/gpt-4",
-      "response": "Quantum computing is...",
-      "promptTokens": 10,
-      "completionTokens": 150,
-      "totalTokens": 160,
-      "latencyMs": 1234,
-      "cost": 0.0048,
-      "error": null
-    }
-  ],
-  "summary": {
-    "totalCost": 0.0096,
-    "averageLatency": 1500,
-    "successRate": 1.0
-  }
+	"run": {
+		"id": "run_abc123",
+		"type": "text",
+		"prompt": "Explain quantum computing",
+		"status": "completed",
+		"createdAt": "2024-01-15T10:30:00Z",
+		"completedAt": "2024-01-15T10:30:15Z"
+	},
+	"responses": [
+		{
+			"id": "resp_def456",
+			"model": "openai/gpt-4",
+			"response": "Quantum computing is...",
+			"promptTokens": 10,
+			"completionTokens": 150,
+			"totalTokens": 160,
+			"latencyMs": 1234,
+			"cost": 0.0048,
+			"error": null
+		}
+	],
+	"summary": {
+		"totalCost": 0.0096,
+		"averageLatency": 1500,
+		"successRate": 1.0
+	}
 }
 ```
 
 **Status Codes:**
+
 - `200 OK` - Success
 - `404 Not Found` - Run not found
 
@@ -213,6 +224,7 @@ Retrieve results for a specific benchmark run.
 List all benchmark results with optional filtering.
 
 **Query Parameters:**
+
 - `limit` (number) - Maximum results to return (default: 50)
 - `offset` (number) - Pagination offset (default: 0)
 - `type` (string) - Filter by benchmark type
@@ -222,25 +234,26 @@ List all benchmark results with optional filtering.
 - `status` (string) - Filter by status (pending, running, completed, failed)
 
 **Response:**
+
 ```json
 {
-  "results": [
-    {
-      "id": "run_abc123",
-      "type": "text",
-      "models": ["gpt-4", "claude-3"],
-      "status": "completed",
-      "createdAt": "2024-01-15T10:30:00Z",
-      "totalCost": 0.0096,
-      "responseCount": 2
-    }
-  ],
-  "pagination": {
-    "total": 150,
-    "limit": 50,
-    "offset": 0,
-    "hasMore": true
-  }
+	"results": [
+		{
+			"id": "run_abc123",
+			"type": "text",
+			"models": ["gpt-4", "claude-3"],
+			"status": "completed",
+			"createdAt": "2024-01-15T10:30:00Z",
+			"totalCost": 0.0096,
+			"responseCount": 2
+		}
+	],
+	"pagination": {
+		"total": 150,
+		"limit": 50,
+		"offset": 0,
+		"hasMore": true
+	}
 }
 ```
 
@@ -251,6 +264,7 @@ List all benchmark results with optional filtering.
 Retrieve historical benchmark data for analysis.
 
 **Query Parameters:**
+
 - `groupBy` (string) - Group results by: day, week, month
 - `metrics` (string) - Comma-separated metrics: cost, latency, tokens
 - `models` (string) - Comma-separated model IDs
@@ -258,32 +272,33 @@ Retrieve historical benchmark data for analysis.
 - `endDate` (string) - End date (ISO 8601)
 
 **Response:**
+
 ```json
 {
-  "history": [
-    {
-      "date": "2024-01-15",
-      "metrics": {
-        "totalRuns": 25,
-        "totalCost": 1.25,
-        "averageLatency": 1250,
-        "totalTokens": 15000
-      },
-      "models": {
-        "openai/gpt-4": {
-          "runs": 10,
-          "cost": 0.50,
-          "averageLatency": 1100
-        }
-      }
-    }
-  ],
-  "summary": {
-    "totalRuns": 250,
-    "totalCost": 12.50,
-    "topModel": "openai/gpt-4",
-    "trend": "increasing"
-  }
+	"history": [
+		{
+			"date": "2024-01-15",
+			"metrics": {
+				"totalRuns": 25,
+				"totalCost": 1.25,
+				"averageLatency": 1250,
+				"totalTokens": 15000
+			},
+			"models": {
+				"openai/gpt-4": {
+					"runs": 10,
+					"cost": 0.5,
+					"averageLatency": 1100
+				}
+			}
+		}
+	],
+	"summary": {
+		"totalRuns": 250,
+		"totalCost": 12.5,
+		"topModel": "openai/gpt-4",
+		"trend": "increasing"
+	}
 }
 ```
 
@@ -292,24 +307,26 @@ Retrieve historical benchmark data for analysis.
 Compare performance across models over time.
 
 **Query Parameters:**
+
 - `models` (string, required) - Comma-separated model IDs
 - `metric` (string) - Metric to compare: cost, latency, quality
 - `period` (string) - Time period: 7d, 30d, 90d
 
 **Response:**
+
 ```json
 {
-  "comparison": {
-    "models": ["openai/gpt-4", "anthropic/claude-3"],
-    "metric": "latency",
-    "data": [
-      {
-        "date": "2024-01-15",
-        "openai/gpt-4": 1100,
-        "anthropic/claude-3": 950
-      }
-    ]
-  }
+	"comparison": {
+		"models": ["openai/gpt-4", "anthropic/claude-3"],
+		"metric": "latency",
+		"data": [
+			{
+				"date": "2024-01-15",
+				"openai/gpt-4": 1100,
+				"anthropic/claude-3": 950
+			}
+		]
+	}
 }
 ```
 
@@ -320,26 +337,29 @@ Compare performance across models over time.
 Export benchmark results in various formats.
 
 **Request Body:**
+
 ```json
 {
-  "format": "csv",
-  "filters": {
-    "runIds": ["run_abc123", "run_def456"],
-    "startDate": "2024-01-01",
-    "endDate": "2024-01-31",
-    "models": ["openai/gpt-4"]
-  },
-  "includeResponses": true,
-  "includeMetrics": true
+	"format": "csv",
+	"filters": {
+		"runIds": ["run_abc123", "run_def456"],
+		"startDate": "2024-01-01",
+		"endDate": "2024-01-31",
+		"models": ["openai/gpt-4"]
+	},
+	"includeResponses": true,
+	"includeMetrics": true
 }
 ```
 
 **Response:**
+
 - For JSON format: Returns JSON data directly
 - For CSV format: Returns CSV file with appropriate headers
 - For Excel format: Returns XLSX file as binary
 
 **Headers:**
+
 ```
 Content-Type: application/json | text/csv | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 Content-Disposition: attachment; filename="benchmark_export_2024-01-15.csv"
@@ -350,22 +370,23 @@ Content-Disposition: attachment; filename="benchmark_export_2024-01-15.csv"
 Get available export templates.
 
 **Response:**
+
 ```json
 {
-  "templates": [
-    {
-      "id": "basic",
-      "name": "Basic Export",
-      "description": "Essential benchmark data",
-      "fields": ["id", "type", "models", "cost", "latency"]
-    },
-    {
-      "id": "detailed",
-      "name": "Detailed Export",
-      "description": "Complete benchmark data with responses",
-      "fields": ["id", "type", "models", "prompt", "responses", "metrics"]
-    }
-  ]
+	"templates": [
+		{
+			"id": "basic",
+			"name": "Basic Export",
+			"description": "Essential benchmark data",
+			"fields": ["id", "type", "models", "cost", "latency"]
+		},
+		{
+			"id": "detailed",
+			"name": "Detailed Export",
+			"description": "Complete benchmark data with responses",
+			"fields": ["id", "type", "models", "prompt", "responses", "metrics"]
+		}
+	]
 }
 ```
 
@@ -376,22 +397,23 @@ Get available export templates.
 List saved benchmark templates.
 
 **Response:**
+
 ```json
 {
-  "templates": [
-    {
-      "id": "template_abc123",
-      "name": "Creative Writing Test",
-      "description": "Test creative writing capabilities",
-      "type": "text",
-      "config": {
-        "prompt": "Write a short story about...",
-        "temperature": 0.9,
-        "maxTokens": 1000
-      },
-      "createdAt": "2024-01-10T10:00:00Z"
-    }
-  ]
+	"templates": [
+		{
+			"id": "template_abc123",
+			"name": "Creative Writing Test",
+			"description": "Test creative writing capabilities",
+			"type": "text",
+			"config": {
+				"prompt": "Write a short story about...",
+				"temperature": 0.9,
+				"maxTokens": 1000
+			},
+			"createdAt": "2024-01-10T10:00:00Z"
+		}
+	]
 }
 ```
 
@@ -400,30 +422,32 @@ List saved benchmark templates.
 Save a new benchmark template.
 
 **Request Body:**
+
 ```json
 {
-  "name": "JSON Generation Test",
-  "description": "Test structured output generation",
-  "type": "structured",
-  "config": {
-    "prompt": "Generate a user object",
-    "schema": {
-      "type": "object",
-      "properties": {
-        "name": {"type": "string"},
-        "age": {"type": "number"}
-      }
-    }
-  }
+	"name": "JSON Generation Test",
+	"description": "Test structured output generation",
+	"type": "structured",
+	"config": {
+		"prompt": "Generate a user object",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"name": { "type": "string" },
+				"age": { "type": "number" }
+			}
+		}
+	}
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "id": "template_xyz789",
-  "name": "JSON Generation Test",
-  "createdAt": "2024-01-15T10:30:00Z"
+	"id": "template_xyz789",
+	"name": "JSON Generation Test",
+	"createdAt": "2024-01-15T10:30:00Z"
 }
 ```
 
@@ -432,12 +456,14 @@ Save a new benchmark template.
 Delete a benchmark template.
 
 **Parameters:**
+
 - `templateId` (path) - The template identifier
 
 **Response:**
+
 ```json
 {
-  "message": "Template deleted successfully"
+	"message": "Template deleted successfully"
 }
 ```
 
@@ -447,27 +473,27 @@ All errors follow a consistent format:
 
 ```json
 {
-  "error": {
-    "code": "INVALID_REQUEST",
-    "message": "Invalid model ID provided",
-    "details": {
-      "field": "models",
-      "value": "invalid-model"
-    }
-  }
+	"error": {
+		"code": "INVALID_REQUEST",
+		"message": "Invalid model ID provided",
+		"details": {
+			"field": "models",
+			"value": "invalid-model"
+		}
+	}
 }
 ```
 
 ### Error Codes
 
-| Code | Description |
-|------|-------------|
+| Code              | Description               |
+| ----------------- | ------------------------- |
 | `INVALID_REQUEST` | Request validation failed |
-| `NOT_FOUND` | Resource not found |
-| `RATE_LIMITED` | API rate limit exceeded |
-| `MODEL_ERROR` | Model API error |
-| `DATABASE_ERROR` | Database operation failed |
-| `INTERNAL_ERROR` | Internal server error |
+| `NOT_FOUND`       | Resource not found        |
+| `RATE_LIMITED`    | API rate limit exceeded   |
+| `MODEL_ERROR`     | Model API error           |
+| `DATABASE_ERROR`  | Database operation failed |
+| `INTERNAL_ERROR`  | Internal server error     |
 
 ## Rate Limiting
 
@@ -494,11 +520,12 @@ Configure webhooks to receive notifications about benchmark events:
 Register a webhook endpoint.
 
 **Request Body:**
+
 ```json
 {
-  "url": "https://your-domain.com/webhook",
-  "events": ["benchmark.completed", "benchmark.failed"],
-  "secret": "your-webhook-secret"
+	"url": "https://your-domain.com/webhook",
+	"events": ["benchmark.completed", "benchmark.failed"],
+	"secret": "your-webhook-secret"
 }
 ```
 
@@ -514,18 +541,18 @@ Register a webhook endpoint.
 
 ```json
 {
-  "event": "benchmark.completed",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "data": {
-    "runId": "run_abc123",
-    "type": "text",
-    "models": ["gpt-4", "claude-3"],
-    "status": "completed",
-    "summary": {
-      "totalCost": 0.0096,
-      "averageLatency": 1500
-    }
-  }
+	"event": "benchmark.completed",
+	"timestamp": "2024-01-15T10:30:00Z",
+	"data": {
+		"runId": "run_abc123",
+		"type": "text",
+		"models": ["gpt-4", "claude-3"],
+		"status": "completed",
+		"summary": {
+			"totalCost": 0.0096,
+			"averageLatency": 1500
+		}
+	}
 }
 ```
 
@@ -537,15 +564,17 @@ For real-time updates, connect to the WebSocket endpoint:
 const ws = new WebSocket('ws://localhost:5173/api/ws');
 
 ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Received:', data);
+	const data = JSON.parse(event.data);
+	console.log('Received:', data);
 };
 
 // Subscribe to benchmark updates
-ws.send(JSON.stringify({
-  action: 'subscribe',
-  runId: 'run_abc123'
-}));
+ws.send(
+	JSON.stringify({
+		action: 'subscribe',
+		runId: 'run_abc123'
+	})
+);
 ```
 
 ## SDK Examples
@@ -556,19 +585,19 @@ ws.send(JSON.stringify({
 import { BenchmarkClient } from '@hra42/ai-bench-sdk';
 
 const client = new BenchmarkClient({
-  baseUrl: 'http://localhost:5173/api',
-  apiKey: process.env.OPENROUTER_API_KEY
+	baseUrl: 'http://localhost:5173/api',
+	apiKey: process.env.OPENROUTER_API_KEY
 });
 
 // Execute benchmark
 const result = await client.execute({
-  type: 'text',
-  models: ['gpt-4', 'claude-3'],
-  prompt: 'Explain quantum computing',
-  config: {
-    temperature: 0.7,
-    maxTokens: 500
-  }
+	type: 'text',
+	models: ['gpt-4', 'claude-3'],
+	prompt: 'Explain quantum computing',
+	config: {
+		temperature: 0.7,
+		maxTokens: 500
+	}
 });
 
 // Get results
@@ -649,6 +678,7 @@ curl -X POST http://localhost:5173/api/export \
 ## Changelog
 
 ### v1.0.0 (2024-01-15)
+
 - Initial API release
 - Core benchmark execution endpoints
 - Model management
@@ -656,6 +686,7 @@ curl -X POST http://localhost:5173/api/export \
 - SSE streaming support
 
 ### v1.1.0 (2024-02-01)
+
 - Added webhook support
 - WebSocket real-time updates
 - Template management

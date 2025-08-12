@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     steps:
       - name: Get deleted tag name
         id: get_tag
@@ -46,27 +46,27 @@ jobs:
         run: |
           TAG_NAME="${{ steps.get_tag.outputs.tag_name }}"
           echo "Git tag to delete: $TAG_NAME"
-          
+
           # Convert git tag to container image tag (strip 'v' prefix if present)
           CONTAINER_TAG=$(echo "$TAG_NAME" | sed 's/^v//')
           echo "Looking for container images with tag: $CONTAINER_TAG"
-          
+
           # Extract repo name from full repository name
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "Repository name: $REPO_NAME"
           echo "Repository owner: ${{ github.repository_owner }}"
-          
+
           # Try user endpoint first
           echo "Trying user endpoint..."
           USER_RESPONSE=$(curl -s \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions")
-          
+
           echo "User API response: $USER_RESPONSE"
-          
+
           PACKAGE_VERSIONS=$(echo "$USER_RESPONSE" | jq -r --arg tag "$CONTAINER_TAG" '.[] | select(.metadata.container.tags[]? == $tag) | .id' 2>/dev/null)
-          
+
           # If user endpoint fails, try org endpoint
           if [ -z "$PACKAGE_VERSIONS" ]; then
             echo "Trying org endpoint..."
@@ -79,13 +79,13 @@ jobs:
             
             PACKAGE_VERSIONS=$(echo "$ORG_RESPONSE" | jq -r --arg tag "$CONTAINER_TAG" '.[] | select(.metadata.container.tags[]? == $tag) | .id' 2>/dev/null)
           fi
-          
+
           if [ -z "$PACKAGE_VERSIONS" ]; then
             echo "No images found for container tag $CONTAINER_TAG (from git tag $TAG_NAME)"
             echo "This is expected if no container images exist for this tag"
             exit 0
           fi
-          
+
           # Delete each version
           for VERSION_ID in $PACKAGE_VERSIONS; do
             echo "Deleting package version ID: $VERSION_ID"
@@ -114,7 +114,7 @@ jobs:
               echo "Failed to delete version $VERSION_ID (HTTP $HTTP_CODE)"
             fi
           done
-          
+
           echo "Cleanup completed for git tag: $TAG_NAME (container tag: $CONTAINER_TAG)"
 
       - name: Cleanup summary

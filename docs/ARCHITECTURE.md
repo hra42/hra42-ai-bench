@@ -10,27 +10,27 @@ graph TB
         UI[Web UI - SvelteKit]
         Stores[Svelte Stores]
     end
-    
+
     subgraph "API Layer"
         API[SvelteKit API Routes]
         SSE[Server-Sent Events]
     end
-    
+
     subgraph "Service Layer"
         OR[OpenRouter Client]
         DB[DuckDB Client]
         FileProc[File Processor]
     end
-    
+
     subgraph "External Services"
         OpenRouter[OpenRouter API]
     end
-    
+
     subgraph "Data Layer"
         DuckDB[(DuckDB)]
         Files[File Storage]
     end
-    
+
     UI --> Stores
     Stores --> API
     API --> SSE
@@ -53,49 +53,49 @@ graph TD
         Benchmark[Benchmark Page]
         History[History Page]
     end
-    
+
     subgraph "Templates"
         BenchTemplate[BenchmarkingInterface]
         HistTemplate[HistoryView]
         DashTemplate[DashboardView]
     end
-    
+
     subgraph "Organisms"
         Config[BenchmarkConfigurator]
         Grid[ModelComparisonGrid]
         Runner[BenchmarkRunner]
         Table[HistoryTable]
     end
-    
+
     subgraph "Molecules"
         ModelSel[ModelSelector]
         CostDisp[CostDisplay]
         FileUp[FileUploader]
         MetricCard[MetricCard]
     end
-    
+
     subgraph "Atoms"
         Button[Button]
         Input[Input]
         Card[Card]
         Badge[Badge]
     end
-    
+
     Home --> DashTemplate
     Benchmark --> BenchTemplate
     History --> HistTemplate
-    
+
     BenchTemplate --> Config
     BenchTemplate --> Grid
     BenchTemplate --> Runner
-    
+
     HistTemplate --> Table
-    
+
     Config --> ModelSel
     Config --> FileUp
     Grid --> MetricCard
     Grid --> CostDisp
-    
+
     ModelSel --> Button
     ModelSel --> Input
     CostDisp --> Badge
@@ -112,24 +112,24 @@ graph LR
         Results[/api/results]
         Export[/api/export]
     end
-    
+
     subgraph "Services"
         ModelService[Model Service]
         BenchmarkService[Benchmark Service]
         ResultService[Result Service]
         ExportService[Export Service]
     end
-    
+
     subgraph "Data Access"
         DBClient[DuckDB Client]
         ORClient[OpenRouter Client]
     end
-    
+
     Models --> ModelService
     Execute --> BenchmarkService
     Results --> ResultService
     Export --> ExportService
-    
+
     ModelService --> ORClient
     ModelService --> DBClient
     BenchmarkService --> ORClient
@@ -150,14 +150,14 @@ sequenceDiagram
     participant SSE
     participant OpenRouter
     participant DuckDB
-    
+
     User->>UI: Configure Benchmark
     UI->>API: POST /api/execute
     API->>DuckDB: Create benchmark_run
     API->>UI: Return runId
-    
+
     UI->>SSE: Connect to stream
-    
+
     loop For each model
         API->>OpenRouter: Send prompt
         OpenRouter-->>API: Stream response
@@ -165,7 +165,7 @@ sequenceDiagram
         SSE-->>UI: Update display
         API->>DuckDB: Save response
     end
-    
+
     API->>DuckDB: Update run status
     API-->>SSE: Send complete event
     SSE-->>UI: Show final results
@@ -180,12 +180,12 @@ sequenceDiagram
     participant API
     participant FileProcessor
     participant Storage
-    
+
     User->>UI: Upload file
     UI->>UI: Validate file type/size
     UI->>API: Send file data
     API->>FileProcessor: Process file
-    
+
     alt Image File
         FileProcessor->>FileProcessor: Convert to Base64
         FileProcessor->>API: Return encoded data
@@ -194,7 +194,7 @@ sequenceDiagram
         FileProcessor->>FileProcessor: Parse structure
         FileProcessor->>API: Return extracted data
     end
-    
+
     API->>Storage: Store temporarily
     API->>UI: Return file reference
 ```
@@ -208,7 +208,7 @@ erDiagram
     BENCHMARK_RUNS ||--o{ MODEL_RESPONSES : contains
     BENCHMARK_RUNS ||--o| BENCHMARK_TEMPLATES : uses
     MODELS ||--o{ MODEL_RESPONSES : generates
-    
+
     BENCHMARK_RUNS {
         text id PK
         text type
@@ -219,7 +219,7 @@ erDiagram
         timestamp completed_at
         text template_id FK
     }
-    
+
     MODEL_RESPONSES {
         text id PK
         text run_id FK
@@ -233,7 +233,7 @@ erDiagram
         json metadata
         timestamp created_at
     }
-    
+
     MODELS {
         text id PK
         text name
@@ -243,7 +243,7 @@ erDiagram
         json capabilities
         timestamp updated_at
     }
-    
+
     BENCHMARK_TEMPLATES {
         text id PK
         text name
@@ -257,21 +257,25 @@ erDiagram
 ### Table Details
 
 #### benchmark_runs
+
 - **Purpose**: Track benchmark execution sessions
 - **Indexes**: `created_at`, `type`, `status`
 - **Partitioning**: Monthly by `created_at`
 
 #### model_responses
+
 - **Purpose**: Store individual model responses and metrics
 - **Indexes**: `run_id`, `model_id`, `created_at`
 - **Constraints**: Foreign key to `benchmark_runs`
 
 #### models
+
 - **Purpose**: Cache model information from OpenRouter
 - **Indexes**: `provider`, `updated_at`
 - **Update frequency**: Daily
 
 #### benchmark_templates
+
 - **Purpose**: Store reusable benchmark configurations
 - **Indexes**: `type`, `created_at`
 
@@ -287,7 +291,7 @@ graph TD
         ModelStore[models.ts]
         UIStore[ui.ts]
     end
-    
+
     subgraph "Store State"
         BenchConfig[Benchmark Config]
         ActiveRun[Active Run]
@@ -295,7 +299,7 @@ graph TD
         ModelList[Model List]
         UIState[UI State]
     end
-    
+
     BenchmarkStore --> BenchConfig
     BenchmarkStore --> ActiveRun
     ResultStore --> Results
@@ -336,13 +340,13 @@ graph TD
         RateLimit[Rate Limiting]
         InputVal[Input Validation]
     end
-    
+
     subgraph "Protected Resources"
         ORAPI[OpenRouter API]
         DB[Database]
         Files[File System]
     end
-    
+
     ENV --> ServerAuth
     ServerAuth --> ORAPI
     ServerAuth --> DB
@@ -383,13 +387,13 @@ graph LR
         ResultCache[Result Cache]
         FileCache[File Cache]
     end
-    
+
     subgraph "Cache Policies"
         TTL[TTL: 24 hours]
         LRU[LRU Eviction]
         Size[Size Limits]
     end
-    
+
     ModelCache --> TTL
     ResultCache --> LRU
     FileCache --> Size
@@ -446,14 +450,14 @@ graph TD
         K8s[Kubernetes]
         Cloud[Cloud Platforms]
     end
-    
+
     subgraph "Infrastructure"
         LB[Load Balancer]
         App[App Instances]
         DB[DuckDB Volume]
         Storage[File Storage]
     end
-    
+
     Docker --> App
     K8s --> LB
     LB --> App
@@ -473,13 +477,13 @@ graph LR
         APIMetrics[API Metrics]
         DBMetrics[Database Metrics]
     end
-    
+
     subgraph "Collection"
         Prometheus[Prometheus]
         Grafana[Grafana]
         Logs[Log Aggregation]
     end
-    
+
     AppMetrics --> Prometheus
     APIMetrics --> Prometheus
     DBMetrics --> Prometheus
@@ -516,26 +520,26 @@ graph LR
     subgraph "Load Balancer"
         LB[HAProxy/Nginx]
     end
-    
+
     subgraph "Application Tier"
         App1[Instance 1]
         App2[Instance 2]
         App3[Instance N]
     end
-    
+
     subgraph "Data Tier"
         DuckDB1[DuckDB Primary]
         DuckDB2[DuckDB Replica]
     end
-    
+
     LB --> App1
     LB --> App2
     LB --> App3
-    
+
     App1 --> DuckDB1
     App2 --> DuckDB1
     App3 --> DuckDB1
-    
+
     DuckDB1 -.-> DuckDB2
 ```
 
